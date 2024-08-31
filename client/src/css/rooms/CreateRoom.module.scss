@@ -1,0 +1,48 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.CreateRoom {
+	width: 100%;
+	padding: 4rem 2rem;
+	@include flex_col(center, center);
+
+	&_field {
+		width: 80%;
+		display: block;
+		margin: 0 auto;
+		margin-bottom: 4rem;
+
+		& label {
+			display: block;
+			font-size: 1.6rem;
+			margin-bottom: 1rem;
+		}
+	}
+	&_actions {
+		width: 80%;
+		margin-top: 2rem;
+		@include flex_row(flex-end, center);
+		gap: 0 2rem;
+	}
+}
+
+@media only screen and (max-width: 700px) {
+	.CreateRoom {
+		width: 100%;
+		padding: 2rem;
+		padding-top: 8rem;
+		@include flex_col(center, center);
+
+		&_field {
+			width: 100%;
+			margin-bottom: 2.5rem;
+		}
+		&_actions {
+			width: 100%;
+			margin-top: 2rem;
+			@include flex_row(flex-end, center);
+			gap: 0 2rem;
+		}
+	}
+}

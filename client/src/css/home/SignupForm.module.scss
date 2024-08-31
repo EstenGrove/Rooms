@@ -1,0 +1,40 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.SignupForm {
+	width: 45rem;
+	height: 52rem;
+	border-radius: 1rem;
+	padding: 2rem;
+	background-color: var(--bg-foreground);
+	box-shadow: var(--focus-shadow);
+	margin-top: 4rem;
+	margin-bottom: 2rem;
+
+	&_title {
+		width: 100%;
+		height: 8rem;
+		font-size: 2.5rem;
+		font-weight: 900;
+		font-family: var(--primary-font);
+		text-align: left;
+		padding-left: 2rem;
+		color: var(--accent);
+	}
+	&_field {
+		width: 100%;
+		padding: 2rem;
+
+		& label {
+			font-size: 1.6rem;
+			font-weight: 500;
+			color: var(--blueGrey400);
+		}
+	}
+	&_actions {
+		width: 100%;
+		@include flex_row(flex-end, center);
+		padding: 2rem;
+	}
+}

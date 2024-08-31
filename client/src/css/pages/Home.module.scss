@@ -1,0 +1,19 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.Home {
+	width: 100%;
+
+	&_inner {
+		width: 100%;
+		max-width: 100%;
+	}
+}
+
+[data-modal-open="true"] {
+	-webkit-filter: blur(5px) grayscale(90%);
+}
+[data-modal-open="false"] {
+	-webkit-filter: none;
+}

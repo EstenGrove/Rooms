@@ -1,0 +1,21 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.Dashboard {
+	@include fill_container;
+
+	&_main {
+		padding: 2rem;
+	}
+}
+
+@media only screen and (max-width: 800px) {
+	.Dashboard {
+		@include fill_container;
+
+		&_main {
+			padding: 2rem 0.5rem;
+		}
+	}
+}

@@ -1,0 +1,46 @@
+@import "./variables";
+@import "./mixins";
+@import "./animations";
+
+@mixin fill_container {
+	width: 100%;
+	height: 100%;
+}
+
+// base flex - display: flex;
+@mixin base_flex {
+	display: -webkit-box;
+	display: flex;
+}
+
+// handles flex rows
+@mixin flex_row($rowType, $colType, $wrapType: nowrap) {
+	@include base_flex;
+	flex-direction: row;
+	justify-content: $rowType;
+	align-items: $colType;
+	flex-wrap: $wrapType;
+}
+// handles flex columns
+@mixin flex_col($rowType, $colType, $wrapType: nowrap) {
+	@include base_flex;
+	flex-direction: column;
+	justify-content: $rowType;
+	align-items: $colType;
+	flex-wrap: $wrapType;
+}
+
+// CUSTOMS SCROLLBARS //
+
+@mixin scrollbar($color: var(--blueGrey400)) {
+	&::-webkit-scrollbar {
+		border-radius: 5rem;
+		width: 0.8rem;
+		// display: none;
+	}
+	&::-webkit-scrollbar-thumb {
+		width: 0.8rem;
+		border-radius: 5rem;
+		background-color: $color;
+	}
+}

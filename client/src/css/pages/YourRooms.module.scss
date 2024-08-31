@@ -1,0 +1,14 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.YourRooms {
+	@include fill_container;
+
+	&_cards {
+		width: 100%;
+		height: auto;
+		@include flex_row(space-evenly, flex-start, wrap);
+		gap: 1rem 1rem;
+	}
+}

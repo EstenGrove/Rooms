@@ -1,0 +1,71 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+$size: 6rem;
+$width: fit-content;
+$height: 4rem;
+
+$iconSize: 3rem;
+
+.UserBadge {
+	padding: 0 0.3rem;
+	padding-right: 1rem;
+	width: $width;
+	height: $height;
+	min-width: $width;
+	max-width: min-content;
+	min-height: $height;
+	max-height: $height;
+	border-radius: 5rem;
+	border: 1px solid var(--border-color);
+	background-color: var(--bg-foreground);
+	color: #fff;
+	font-size: 1.6rem;
+	font-weight: 600;
+	@include flex_row(center, center);
+
+	&_name {
+		@include flex_row(center, center);
+	}
+
+	&_icon {
+		width: $iconSize;
+		height: $iconSize;
+		border-radius: 50%;
+		margin-right: 1rem;
+		fill: var(--accent);
+	}
+}
+
+@media only screen and (max-width: 700px) {
+	.UserBadge {
+		width: 4rem;
+		min-width: 4rem;
+		max-width: 4rem;
+		max-height: 4rem;
+		min-height: 4rem;
+		height: 4rem;
+		border-radius: 50%;
+		padding: 0.5rem;
+		@include flex_row(center, center);
+
+		&_name {
+			display: none;
+		}
+		&_icon {
+			@include flex_row(center, center);
+			min-width: 3.2rem;
+			min-height: 3.2rem;
+			width: 3.2rem;
+			height: 3.2rem;
+			max-width: 3.2rem;
+			max-height: 3.2rem;
+			border-radius: 50%;
+			margin-right: 1rem;
+			fill: var(--accent);
+			margin: 0;
+			padding: 0;
+		}
+	}
+}

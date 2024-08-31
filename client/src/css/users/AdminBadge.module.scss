@@ -1,0 +1,15 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.AdminBadge {
+	width: fit-content;
+	height: 2.5rem;
+	font-size: 1.3rem;
+	padding: 0.2rem 0.6rem;
+	border-radius: 5rem;
+	border: 1px solid var(--border-color);
+	background-color: var(--accent);
+	color: #fff;
+	@include flex_row(center, center);
+}

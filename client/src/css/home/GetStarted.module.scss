@@ -1,0 +1,41 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.GetStarted {
+	@include fill_container;
+	@include flex_col(center, center);
+
+	&_header {
+		width: 100%;
+		min-width: 100%;
+		height: 12rem;
+		text-align: center;
+
+		& h1 {
+			font-size: 3.5rem;
+			color: #fff;
+		}
+	}
+
+	&_cta {
+		width: 100%;
+		height: auto;
+		@include flex_col(center, center);
+
+		&_btn {
+			padding: 1rem 1.8rem;
+			background-color: var(--accent);
+			border-radius: 0.5rem;
+			color: #fff;
+			border: none;
+			outline: none;
+			font-weight: 700;
+			margin-bottom: 2rem;
+		}
+		&_or {
+			font-size: 1.8rem;
+			color: #ffff;
+		}
+	}
+}
