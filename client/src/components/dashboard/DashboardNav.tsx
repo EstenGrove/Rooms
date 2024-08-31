@@ -2,10 +2,11 @@ import styles from "../../css/dashboard/DashboardNav.module.scss";
 import sprite from "../../assets/icons/rooms.svg";
 import UserBadge from "../users/UserBadge";
 import { CurrentUser } from "../../features/auth/authSlice";
-import { NavLink, redirect } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 type Props = {
 	currentUser: CurrentUser;
+	logoutUser: () => void;
 };
 
 const SettingsButton = () => {
@@ -32,15 +33,8 @@ const LogoutButton = ({ logout }: LogoutBtnProps) => {
 	);
 };
 
-const DashboardNav = ({ currentUser }: Props) => {
+const DashboardNav = ({ currentUser, logoutUser }: Props) => {
 	const { displayName } = currentUser;
-
-	const logoutUser = async () => {
-		// send request to server
-		// dispatch state reset action
-		// redirect to home page
-		redirect("/");
-	};
 
 	return (
 		<nav className={styles.DashboardNav}>

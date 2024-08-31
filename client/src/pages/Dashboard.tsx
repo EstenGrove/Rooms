@@ -1,5 +1,5 @@
 import styles from "../css/pages/Dashboard.module.scss";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { CurrentUser, selectCurrentUser } from "../features/auth/authSlice";
 import DashboardNav from "../components/dashboard/DashboardNav";
@@ -15,13 +15,22 @@ const currentUser = {
 };
 
 const Dashboard = () => {
+	const navigate = useNavigate();
 	// const currentUser: CurrentUser = useSelector(selectCurrentUser);
 
 	console.log("currentUser", currentUser);
 
+	const logoutUser = async () => {
+		console.log("clicked");
+		// send request to server
+		// dispatch state reset action
+		// redirect to home page
+		navigate("/");
+	};
+
 	return (
 		<div className={styles.Dashboard}>
-			<DashboardNav currentUser={currentUser} />
+			<DashboardNav currentUser={currentUser} logoutUser={logoutUser} />
 			<DashboardHeader currentUser={currentUser} />
 			{/* DASHBOARD ROUTES */}
 			<div className={styles.Dashboard_main}>
