@@ -16,7 +16,7 @@ type Props = {
 
 const LiveRoomIndicator = () => {
 	return (
-		<div className={styles.LiveRoomIndicator}>
+		<div title="Room is live" className={styles.LiveRoomIndicator}>
 			<div className={styles.LiveRoomIndicator_ping}>
 				<div className={styles.LiveRoomIndicator_ping_beacon}></div>
 				<div className={styles.LiveRoomIndicator_ping_flash}></div>
@@ -33,6 +33,7 @@ const StartRoomButton = ({ startRoom }: StartRoom) => {
 	return (
 		<button
 			type="button"
+			title="Start Room"
 			onClick={startRoom}
 			className={styles.StartRoomButton}
 		>

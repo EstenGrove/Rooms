@@ -1,0 +1,56 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.RoomSession {
+	@include fill_container;
+
+	&_header {
+		width: auto;
+	}
+
+	&_title {
+		font-size: 3rem;
+		color: var(--accent);
+	}
+}
+
+.LiveIndicator {
+	position: relative;
+	width: max-content;
+	@include flex_row(flex-start, center);
+
+	&_ping {
+		position: relative;
+		width: max-content;
+		height: max-content;
+
+		&_flash {
+			position: absolute;
+			top: -0.5rem;
+			left: -0.5rem;
+			width: 2rem;
+			height: 2rem;
+			border-radius: 50%;
+			background-color: var(--accent);
+			@include ping2();
+			z-index: 10;
+			// margin-top: -0.1rem;
+		}
+		&_beacon {
+			width: 1rem;
+			height: 1rem;
+			border-radius: 50%;
+			background-color: var(--accent);
+			z-index: 1;
+			// @include ping2();
+			// margin-top: -0.1rem;
+		}
+	}
+
+	&_msg {
+		font-size: 1.2rem;
+		color: var(--blueGrey200);
+		margin-left: 0.5rem;
+	}
+}

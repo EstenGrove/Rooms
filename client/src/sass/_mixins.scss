@@ -47,3 +47,13 @@
 		color: var(--accent);
 	}
 }
+
+@mixin round($size) {
+	width: $size;
+	min-width: $size;
+	max-width: $size;
+	height: $size;
+	min-height: $size;
+	max-height: $size;
+	border-radius: 50%;
+}

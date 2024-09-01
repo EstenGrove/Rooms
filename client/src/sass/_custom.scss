@@ -44,3 +44,27 @@
 		background-color: $color;
 	}
 }
+
+@mixin scrollbarX($height: 0.5rem, $color: var(--blueGrey400)) {
+	&::-webkit-scrollbar {
+		border-radius: 5rem;
+		height: $height;
+	}
+	&::-webkit-scrollbar-thumb {
+		height: $height;
+		border-radius: 5rem;
+		background-color: $color;
+	}
+}
+
+@mixin scrollbarY($width: 0.5rem, $color: var(--blueGrey400)) {
+	&::-webkit-scrollbar {
+		border-radius: 5rem;
+		width: $width;
+	}
+	&::-webkit-scrollbar-thumb {
+		width: $width;
+		border-radius: 5rem;
+		background-color: $color;
+	}
+}

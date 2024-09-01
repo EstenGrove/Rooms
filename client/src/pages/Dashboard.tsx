@@ -5,6 +5,7 @@ import { CurrentUser, selectCurrentUser } from "../features/auth/authSlice";
 import DashboardNav from "../components/dashboard/DashboardNav";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import DashboardTabs from "../components/layout/DashboardTabs";
+import CreateRoomButton from "../components/rooms/CreateRoomButton";
 
 const currentUser = {
 	username: "EstenGrove",
@@ -28,11 +29,18 @@ const Dashboard = () => {
 		navigate("/");
 	};
 
+	const createNewRoom = async () => {
+		// do stuff
+	};
+
 	return (
 		<div className={styles.Dashboard}>
 			<DashboardNav currentUser={currentUser} logoutUser={logoutUser} />
 			<DashboardHeader currentUser={currentUser} />
 			{/* DASHBOARD ROUTES */}
+			<div className={styles.Dashboard_actions}>
+				<CreateRoomButton onClick={createNewRoom} />
+			</div>
 			<div className={styles.Dashboard_main}>
 				<DashboardTabs />
 				<Outlet />

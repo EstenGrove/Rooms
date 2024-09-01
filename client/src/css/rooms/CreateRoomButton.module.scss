@@ -1,0 +1,52 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.CreateRoomButton {
+	padding: 1rem 1.4rem;
+	border-radius: 5rem;
+	border: none;
+	outline: none;
+	@include flex_row(center, center);
+	gap: 0 0.5rem;
+	background-color: var(--accent);
+	&:hover {
+		cursor: pointer;
+		box-shadow: var(--hover-shadow);
+	}
+
+	&_icon {
+		width: 2.5rem;
+		height: 2.5rem;
+		fill: #fff;
+	}
+	&_text {
+		font-size: 1.6rem;
+		font-weight: 600;
+		color: #ffff;
+	}
+
+	&:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+	}
+}
+
+@media only screen and (max-width: 700px) {
+	.CreateRoomButton {
+		position: fixed;
+		bottom: 1rem;
+		right: 1rem;
+		@include round(4rem);
+		box-shadow: var(--hover-shadow);
+
+		&_icon {
+			@include round(2.5rem);
+			fill: #fff;
+		}
+
+		&_text {
+			display: none;
+		}
+	}
+}

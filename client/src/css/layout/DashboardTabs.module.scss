@@ -8,8 +8,9 @@
 	padding: 1rem 4rem;
 	@include flex_row(flex-start, flex-end);
 	gap: 0 0.5rem;
-	// border-bottom: 2px solid var(--border-color);
 	margin-bottom: 4rem;
+	overflow-x: scroll;
+	@include scrollbarX();
 }
 .TabButton {
 	min-width: max-content;
@@ -32,6 +33,14 @@
 .isActive {
 	background-color: var(--border-color);
 	color: #fff;
+}
+
+a[aria-disabled="true"] .TabButton {
+	cursor: not-allowed;
+}
+a[aria-disabled="true"] {
+	opacity: 0.1;
+	cursor: not-allowed;
 }
 
 @media only screen and (max-width: 800px) {

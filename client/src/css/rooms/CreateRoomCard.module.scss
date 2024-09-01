@@ -1,0 +1,32 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.CreateRoomCard {
+	width: 35rem;
+	height: 25rem;
+	border-radius: 1rem;
+	border: 2px dashed var(--border-color);
+	padding: 2rem;
+	background-color: transparent;
+	@include flex_col(center, center);
+	gap: 1rem;
+	transition: all 0.2s ease-in-out;
+	&:hover {
+		cursor: pointer;
+		border: 2px dashed var(--accent);
+	}
+	&:hover &_text {
+		color: var(--accent);
+	}
+
+	&_icon {
+		width: 6rem;
+		height: 6rem;
+		fill: var(--accent);
+	}
+	&_text {
+		font-size: 1.8rem;
+		color: var(--blueGrey300);
+	}
+}
