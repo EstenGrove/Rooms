@@ -1,6 +1,7 @@
 import styles from "../css/pages/YourRooms.module.scss";
 import RoomCard from "../components/rooms/RoomCard";
 import { RoomInfo } from "../components/rooms/types";
+import CreateRoomCard from "../components/rooms/CreateRoomCard";
 
 const createDate = (start: Date, end: Date): Date => {
 	return new Date(
@@ -41,9 +42,15 @@ const createRooms = (count: number): RoomInfo[] => {
 
 const YourRooms = () => {
 	const userRooms: RoomInfo[] = createRooms(12);
+
+	const createNewRoom = async () => {
+		// do stuff
+	};
+
 	return (
 		<div className={styles.YourRooms}>
 			<div className={styles.YourRooms_cards}>
+				<CreateRoomCard onClick={createNewRoom} />
 				{userRooms &&
 					userRooms.map((room) => (
 						<RoomCard key={room.roomCode} roomInfo={room} />

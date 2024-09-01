@@ -72,19 +72,18 @@
 	}
 }
 .StartRoomButton {
+	@include round(3.2rem);
 	margin-top: 0.5rem;
 	padding: 0.3rem 0.4rem;
-	border-radius: 50%;
 	background-color: transparent;
 	color: var(--accent);
-	border: none;
 	border: 1px solid var(--accent);
 	background-color: var(--accent);
 	outline: none;
-	font-size: 1.2rem;
 	@include flex_row(center, center);
 	&:hover {
 		cursor: pointer;
+		box-shadow: var(--hover-shadow);
 	}
 	&_icon {
 		width: 2.2rem;
