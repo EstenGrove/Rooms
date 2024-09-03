@@ -18,3 +18,8 @@ export interface RoomInfo {
 	isAlive: boolean;
 	members: Array<RoomInfoMember>;
 }
+
+export interface JoinValues {
+	displayName: string;
+	roomCode: string;
+}

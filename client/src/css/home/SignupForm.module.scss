@@ -32,6 +32,14 @@
 			color: var(--blueGrey400);
 		}
 	}
+	&_errors {
+		width: 100%;
+		height: 2rem;
+		padding: 0 2rem;
+		font-size: 1.3rem;
+		color: var(--accent);
+		color: red;
+	}
 	&_actions {
 		width: 100%;
 		@include flex_row(flex-end, center);

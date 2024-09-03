@@ -1,0 +1,29 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.JoinRoom {
+	@include fill_container;
+	padding: 2rem;
+
+	&_form {
+		width: 100%;
+		max-width: 50rem;
+		display: block;
+		margin: 0 auto;
+
+		&_field {
+			width: 100%;
+			margin-bottom: 4rem;
+		}
+		&_actions {
+			width: 100%;
+			margin-top: 6rem;
+		}
+		&_ctaOptions {
+			width: 100%;
+			padding: 1rem 0;
+			@include flex_col(center, center);
+		}
+	}
+}

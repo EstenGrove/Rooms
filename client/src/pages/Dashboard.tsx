@@ -19,8 +19,6 @@ const Dashboard = () => {
 	const navigate = useNavigate();
 	// const currentUser: CurrentUser = useSelector(selectCurrentUser);
 
-	console.log("currentUser", currentUser);
-
 	const logoutUser = async () => {
 		console.log("clicked");
 		// send request to server

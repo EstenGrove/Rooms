@@ -15,6 +15,7 @@ const customCSS = {
 
 type Props = {
 	values: LoginValues;
+	isSubmitting: boolean;
 	loginUser: () => void;
 	onChange: (name: string, value: string) => void;
 };
@@ -29,8 +30,13 @@ const isLoginDisabled = (values: LoginValues) => {
 	return isEmpty || noMinLength;
 };
 
-const LoginForm = ({ values, onChange, loginUser }: Props) => {
-	const isBtnDisabled: boolean = isLoginDisabled(values);
+const LoginForm = ({
+	values,
+	onChange,
+	loginUser,
+	isSubmitting = false,
+}: Props) => {
+	const isBtnDisabled: boolean = isSubmitting || isLoginDisabled(values);
 
 	return (
 		<form className={styles.LoginForm}>
@@ -61,7 +67,7 @@ const LoginForm = ({ values, onChange, loginUser }: Props) => {
 					isDisabled={isBtnDisabled}
 					style={customCSS}
 				>
-					Login
+					{isSubmitting ? "Logging in..." : "Login"}
 				</Button>
 			</div>
 		</form>

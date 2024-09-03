@@ -1,20 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { TStatus } from "../types";
 import { RootState } from "../../store/store";
-
-export interface CurrentUser {
-	username: string;
-	password: string;
-	displayName: string;
-	token: string;
-	loginDate: string;
-}
-
-export interface CurrentSession {
-	token: string;
-	lastRefreshed: string;
-	isAuthenticated: boolean;
-}
+import { CurrentSession, CurrentUser } from "./types";
+import { loginUser } from "./operations";
 
 export interface AuthSlice {
 	currentUser: CurrentUser | null;
@@ -33,12 +21,21 @@ const authSlice = createSlice({
 	initialState: initialState,
 	reducers: {},
 	extraReducers(builder) {
-		//
-		//
+		builder
+			.addCase(loginUser.pending, (state) => {
+				state.status = "PENDING";
+			})
+			.addCase(loginUser.fulfilled, (state, action) => {
+				state.status = "FULFILLED";
+				state.currentUser = action.payload;
+			});
 	},
 });
 
 export const selectCurrentUser = (state: RootState) =>
 	state.auth.currentUser as CurrentUser;
+export const selectCurrentSession = (state: RootState) =>
+	state.auth.currentSession as CurrentSession;
+export const selectAuthStatus = (state: RootState) => state.auth.status;
 
 export default authSlice.reducer;

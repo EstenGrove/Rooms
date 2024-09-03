@@ -1,4 +1,4 @@
-@mixin glassy($color: rgba(0, 0, 0, 0.4)) {
+@mixin glassy($color: rgba(0, 0, 0, 0.8)) {
 	background-color: $color;
 	backdrop-filter: blur(45px);
 }
