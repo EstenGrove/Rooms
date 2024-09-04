@@ -5,9 +5,18 @@ export type TModelShape = {
 	Data?: object;
 	Message?: string;
 	Results?: string | number;
-	ErrorMessage?: string;
+	ErrorMsg?: string;
 	ErrorStack?: string;
 };
+
+export interface IResponse<T> {
+	Status: TResponseStatus;
+	Data: T;
+	Message?: string;
+	Results?: string | number;
+	ErrorMsg?: string;
+	ErrorStack?: string;
+}
 
 export interface IResponseModel {
 	model: TModelShape;
@@ -25,7 +34,7 @@ export interface IRequestResponse {
 	};
 	Message?: string | null;
 	Results?: string | number;
-	ErrorMessage?: string | null;
+	ErrorMsg?: string | null;
 	ErrorStack?: string | null;
 }
 
@@ -54,7 +63,7 @@ class ResponseModel {
 			Data: data,
 			Message: msg,
 			Results: results,
-			ErrorMessage: errorMsg as TModelShape["ErrorMessage"],
+			ErrorMsg: errorMsg as TModelShape["ErrorMsg"],
 			ErrorStack: errorStack as TModelShape["ErrorStack"],
 		};
 

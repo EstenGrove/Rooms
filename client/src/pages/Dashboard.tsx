@@ -1,7 +1,14 @@
 import styles from "../css/pages/Dashboard.module.scss";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../store/store";
 import { useSelector } from "react-redux";
-import { CurrentUser, selectCurrentUser } from "../features/auth/authSlice";
+import {
+	CurrentUser,
+	initialState,
+	resetAuth,
+	selectCurrentUser,
+	setCurrentUser,
+} from "../features/auth/authSlice";
 import DashboardNav from "../components/dashboard/DashboardNav";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import DashboardTabs from "../components/layout/DashboardTabs";
@@ -17,6 +24,7 @@ const currentUser = {
 
 const Dashboard = () => {
 	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
 	// const currentUser: CurrentUser = useSelector(selectCurrentUser);
 
 	const logoutUser = async () => {
@@ -24,7 +32,8 @@ const Dashboard = () => {
 		// send request to server
 		// dispatch state reset action
 		// redirect to home page
-		navigate("/");
+		dispatch(resetAuth());
+		navigate("/?tab=login");
 	};
 
 	const createNewRoom = async () => {

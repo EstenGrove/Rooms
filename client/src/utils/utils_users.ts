@@ -1,8 +1,20 @@
 import { ILoginParams, ISignupParams } from "../features/auth/operations";
+import { CurrentSession, CurrentUser } from "../features/auth/types";
 import { currentEnv, usersEndpoints } from "./utils_env";
-import { fetchWithAuth } from "./utils_http";
+import { fetchWithAuth, TResponse } from "./utils_http";
 
-const login = async (userLogin: ILoginParams) => {
+export interface ILoginResp {
+	User: CurrentUser;
+	Session: CurrentSession;
+}
+export interface ISignupResp {
+	User: CurrentUser;
+	Session: CurrentSession;
+}
+
+const login = async (
+	userLogin: ILoginParams
+): Promise<TResponse<ILoginResp> | unknown> => {
 	const url: string = currentEnv.base + usersEndpoints.login;
 	try {
 		const response = await fetchWithAuth(url, {
@@ -15,7 +27,9 @@ const login = async (userLogin: ILoginParams) => {
 		return error;
 	}
 };
-const signup = async (userSignup: ISignupParams) => {
+const signup = async (
+	userSignup: ISignupParams
+): Promise<TResponse<ISignupResp> | unknown> => {
 	const url: string = currentEnv.base + usersEndpoints.login;
 	try {
 		const response = await fetchWithAuth(url, {

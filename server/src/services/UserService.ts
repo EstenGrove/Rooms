@@ -1,10 +1,5 @@
 import { Pool, QueryResult, QueryResultRow } from "pg";
 import PostgresDB from "../db/postgres/postgresDB";
-import {
-	InvalidCredsError,
-	isError,
-	UserNotFoundError,
-} from "../utils/utils_errors";
 
 // Table: 'users'
 export interface UserSvcResult {
@@ -30,6 +25,7 @@ export interface UserLoginSvcResult {
 export interface UserLoginResponse {
 	user: UserSvcResult | null;
 	login: UserLoginSvcResult | null;
+	error?: string | Error;
 }
 
 export interface UserDetails {
@@ -150,16 +146,24 @@ class UserService {
 				existingUser
 			);
 
-			// ##TODOS
-			// - REMOVE THESE 'throw new XXXX()' CUZ IT'S SHIT!!!
 			// user doesn't exist
 			if (!existingUser) {
-				throw new UserNotFoundError() as Error;
+				return {
+					user: null,
+					login: null,
+					error: new Error("Account not found"),
+					// error: "Account not found",
+				};
 			}
 
 			// invalid credentials
 			if (!hasValidCreds) {
-				throw new InvalidCredsError();
+				return {
+					user: null,
+					login: null,
+					error: new Error("Incorrect login info."),
+					// error: "Incorrect login info.",
+				};
 			}
 
 			// user exists & has valid credentials, create a user_login record
@@ -172,8 +176,13 @@ class UserService {
 				user: existingUser,
 				login: loginRecord,
 			};
-		} catch (error: unknown) {
-			return error as Error;
+		} catch (error) {
+			const err = error as Error;
+			return {
+				user: null,
+				login: null,
+				error: err,
+			};
 		}
 	}
 

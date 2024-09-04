@@ -1,1 +1,1 @@
-export type TStatus = "IDLE" | "PENDING" | "FULFILLED" | "REJECT";
+export type TStatus = "IDLE" | "PENDING" | "FULFILLED" | "REJECTED";

@@ -15,6 +15,7 @@ const customCSS = {
 
 type Props = {
 	values: LoginValues;
+	errorMsg: string;
 	isSubmitting: boolean;
 	loginUser: () => void;
 	onChange: (name: string, value: string) => void;
@@ -32,6 +33,7 @@ const isLoginDisabled = (values: LoginValues) => {
 
 const LoginForm = ({
 	values,
+	errorMsg,
 	onChange,
 	loginUser,
 	isSubmitting = false,
@@ -41,6 +43,9 @@ const LoginForm = ({
 	return (
 		<form className={styles.LoginForm}>
 			<h3 className={styles.LoginForm_title}>Sign in</h3>
+			{errorMsg && (
+				<div className={styles.LoginForm_errorMsg}>Error: {errorMsg}</div>
+			)}
 			<div className={styles.LoginForm_field}>
 				<label htmlFor="username">Username/Email</label>
 				<TextInput

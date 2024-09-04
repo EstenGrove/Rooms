@@ -1,11 +1,13 @@
+import { TStatus } from "../features/types";
 import { currentEnv } from "./utils_env";
 
 export type TResponseStatus = "SUCCESS" | "FAIL";
 export type TResponse<T> = {
-	Status: TResponseStatus;
-	Data: T;
-	Error: string | null;
-	ErrorCode: number | null;
+	Status: TStatus;
+	Data: T | null;
+	Message: string;
+	ErrorMsg: string | null;
+	StackTrace: string | null;
 };
 
 export interface IRequestOpts {

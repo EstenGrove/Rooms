@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../../css/home/GetStarted.module.scss";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
@@ -7,10 +7,19 @@ import Button from "../shared/Button";
 import Modal from "../shared/Modal";
 import JoinRoom from "../rooms/JoinRoom";
 import { JoinValues } from "../rooms/types";
-import { loginUser } from "../../features/auth/operations";
 import { useAppDispatch } from "../../store/store";
 import { useSelector } from "react-redux";
-import { selectAuthStatus } from "../../features/auth/authSlice";
+import {
+	selectCurrentUser,
+	setCurrentUser,
+} from "../../features/auth/authSlice";
+import {
+	ILoginResp,
+	ISignupResp,
+	login,
+	signup,
+} from "../../utils/utils_users";
+import { TResponse } from "../../utils/utils_http";
 
 // SIGN IN
 // SIGNUP
@@ -54,12 +63,13 @@ const initialSignup: SignupValues = {
 };
 
 const GetStarted = () => {
+	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
-	const authStatus = useSelector(selectAuthStatus);
-	const isSubmitting: boolean = authStatus === "PENDING";
+	const currentUser = useSelector(selectCurrentUser);
 	// params
 	const [params, setParams] = useSearchParams();
 	const tid: string = params.get("tab") || "signup";
+	const [authError, setAuthError] = useState<string>("");
 	// modals
 	const [showJoinRoomModal, setShowJoinRoomModal] = useState<boolean>(false);
 	const [activeForm, setActiveForm] = useState<ActiveForm>(tid as ActiveForm);
@@ -67,6 +77,7 @@ const GetStarted = () => {
 	const [loginValues, setLoginValues] = useState<LoginValues>(initialLogin);
 	const [signupValues, setSignupValues] = useState<SignupValues>(initialSignup);
 	const [joinRoomValues, setJoinRoomValues] = useState<JoinValues>(initialJoin);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const handleLoginForm = (name: string, value: string) => {
 		setLoginValues({
@@ -93,11 +104,33 @@ const GetStarted = () => {
 	};
 
 	const userLogin = async () => {
-		dispatch(loginUser(loginValues));
+		const loginInfo = (await login(loginValues)) as TResponse<ILoginResp>;
+
+		// handle any auth errors: "Account not Found." or "Incorrect Login Info."
+		if (loginInfo.ErrorMsg) {
+			setIsSubmitting(false);
+			return setAuthError(loginInfo.ErrorMsg);
+		}
+
+		setIsSubmitting(false);
+
+		const { User, Session } = loginInfo.Data as ILoginResp;
+		dispatch(setCurrentUser({ user: User, session: Session }));
+		navigate("/dashboard/rooms");
 	};
 	const userSignup = async () => {
-		//
-		//
+		const signupInfo = (await signup(signupValues)) as TResponse<ISignupResp>;
+
+		if (signupInfo.ErrorMsg) {
+			setIsSubmitting(false);
+			return setAuthError(signupInfo.ErrorMsg);
+		}
+
+		setIsSubmitting(false);
+
+		const { User, Session } = signupInfo.Data as ISignupResp;
+		dispatch(setCurrentUser({ user: User, session: Session }));
+		navigate("/dashboard/rooms");
 	};
 
 	const openJoinRoomModal = () => {
@@ -139,7 +172,10 @@ const GetStarted = () => {
 					<SignupForm
 						values={signupValues}
 						onChange={handleSignupForm}
-						signupUser={userSignup}
+						signupUser={() => {
+							setIsSubmitting(true);
+							userSignup();
+						}}
 					/>
 					<Button onClick={() => changeForms("login")} style={customCSS.altBtn}>
 						Already have an account? Login here
@@ -153,8 +189,12 @@ const GetStarted = () => {
 					<LoginForm
 						values={loginValues}
 						onChange={handleLoginForm}
-						loginUser={userLogin}
+						loginUser={() => {
+							setIsSubmitting(true);
+							userLogin();
+						}}
 						isSubmitting={isSubmitting}
+						errorMsg={authError as string}
 					/>
 					<Button
 						onClick={() => changeForms("signup")}

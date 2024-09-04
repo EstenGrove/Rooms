@@ -1,5 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { login, signup } from "../../utils/utils_users";
+import { TResponse } from "../../utils/utils_http";
+import { CurrentSession, CurrentUser } from "./types";
 
 export interface ILoginParams {
 	username: string;
@@ -11,11 +13,17 @@ export type ISignupParams = ILoginParams;
 const loginUser = createAsyncThunk(
 	"auth/loginUser",
 	async (params: ILoginParams) => {
-		const loginResp = await login(params);
-		const { Data } = loginResp;
+		const loginResp = (await login(params)) as TResponse<{
+			User: object;
+			Session: object;
+		}>;
+		const data = loginResp.Data as {
+			User: CurrentUser;
+			Session: CurrentSession;
+		};
+		const error = loginResp.Error as string;
 		console.log("loginResp", loginResp);
-		console.log("Data", Data);
-		return Data;
+		return { error: error, data: data };
 	}
 );
 const signupUser = createAsyncThunk(
