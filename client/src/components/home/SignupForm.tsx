@@ -16,26 +16,45 @@ const customCSS = {
 
 type Props = {
 	values: SignupValues;
-	loginUser: () => void;
+	errorMsg: string;
+	signupUser: () => void;
 	onChange: (name: string, value: string) => void;
 };
 
-const isLoginDisabled = (values: SignupValues) => {
-	const { username = "", password = "" } = values;
-	const userLength: boolean = username?.length >= 3;
-	const passLength: boolean = password?.length >= 5;
-	const isEmpty: boolean = !username || !password;
-	const noMinLength: boolean = !userLength || !passLength;
+const isFilled = (values: SignupValues) => {
+	const { username, password, confirmPassword } = values;
+	const hasVals: boolean =
+		username.length >= 1 && password.length >= 1 && confirmPassword.length >= 1;
 
-	return isEmpty || noMinLength;
+	return hasVals;
 };
 
-const SignupForm = ({ values, onChange, loginUser }: Props) => {
+const isLoginDisabled = (values: SignupValues) => {
+	const { username, password, confirmPassword } = values;
+	if (!isFilled(values)) return true;
+
+	const userLength: boolean = username?.length >= 3;
+	const passLength: boolean = password?.length >= 5;
+	const confLength: boolean = confirmPassword?.length >= 5;
+	const noMinLength: boolean = !userLength || !passLength || !confLength;
+	const pwdsMatch: boolean = password === confirmPassword;
+
+	return noMinLength || !pwdsMatch;
+};
+
+const SignupForm = ({ values, onChange, signupUser, errorMsg }: Props) => {
+	const { password, confirmPassword } = values;
+	const isFormFilled: boolean = isFilled(values);
 	const isBtnDisabled: boolean = isLoginDisabled(values);
+	const pwdMismatch: boolean = isFormFilled && password !== confirmPassword;
 
 	return (
 		<form className={styles.SignupForm}>
 			<h3 className={styles.SignupForm_title}>Create account</h3>
+			<div className={styles.SignupForm_errors}>
+				{pwdMismatch && <span>Passwords do not match!</span>}
+				{errorMsg && <span>{errorMsg}</span>}
+			</div>
 			<div className={styles.SignupForm_field}>
 				<label htmlFor="username">Username/Email</label>
 				<TextInput
@@ -66,9 +85,13 @@ const SignupForm = ({ values, onChange, loginUser }: Props) => {
 					autoComplete="on"
 				/>
 			</div>
+			{/* <div className={styles.SignupForm_errors}>
+				{pwdMismatch && <span>Passwords do not match!</span>}
+				{errorMsg && <span>{errorMsg}</span>}
+			</div> */}
 			<div className={styles.SignupForm_actions}>
 				<Button
-					onClick={loginUser}
+					onClick={signupUser}
 					isDisabled={isBtnDisabled}
 					style={customCSS}
 				>

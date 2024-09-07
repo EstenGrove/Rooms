@@ -1,0 +1,18 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.LabelledInput {
+	width: 100%;
+	font-family: var(--font-primary);
+
+	&_field {
+		width: 100%;
+
+		& label {
+			font-size: 1.6rem;
+			font-weight: 500;
+			color: var(--blueGrey400);
+		}
+	}
+}

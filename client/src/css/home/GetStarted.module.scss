@@ -32,6 +32,10 @@
 			outline: none;
 			font-weight: 700;
 			margin-bottom: 2rem;
+			&:hover {
+				cursor: pointer;
+				box-shadow: var(--hover-shadow);
+			}
 		}
 		&_or {
 			font-size: 1.8rem;

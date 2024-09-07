@@ -1,13 +1,16 @@
 import styles from "../css/pages/Dashboard.module.scss";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../store/store";
 import { useSelector } from "react-redux";
-import { CurrentUser, selectCurrentUser } from "../features/auth/authSlice";
+import { resetAuth, selectCurrentUser } from "../features/auth/authSlice";
+import { logout } from "../utils/utils_users";
 import DashboardNav from "../components/dashboard/DashboardNav";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import DashboardTabs from "../components/layout/DashboardTabs";
 import CreateRoomButton from "../components/rooms/CreateRoomButton";
+import { CurrentUser } from "../features/auth/types";
 
-const currentUser = {
+const currentUser2 = {
 	username: "EstenGrove",
 	password: "SDFASDFASDF",
 	displayName: "Veronica G.",
@@ -17,21 +20,29 @@ const currentUser = {
 
 const Dashboard = () => {
 	const navigate = useNavigate();
-	// const currentUser: CurrentUser = useSelector(selectCurrentUser);
-
-	console.log("currentUser", currentUser);
+	const dispatch = useAppDispatch();
+	const currentUser: CurrentUser =
+		useSelector(selectCurrentUser) || currentUser2;
 
 	const logoutUser = async () => {
-		console.log("clicked");
+		const userID = currentUser.userID || "";
+		const userLogout = await logout(userID);
+
+		if (!userLogout) {
+			return alert("Shit");
+		}
 		// send request to server
 		// dispatch state reset action
 		// redirect to home page
-		navigate("/");
+		dispatch(resetAuth());
+		navigate("/?tab=login");
 	};
 
 	const createNewRoom = async () => {
 		// do stuff
 	};
+
+	console.log("currentUser", currentUser);
 
 	return (
 		<div className={styles.Dashboard}>

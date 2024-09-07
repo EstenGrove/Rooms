@@ -14,7 +14,8 @@
 	padding: 1rem 2rem;
 	border-radius: 1rem;
 	@include glassy();
-	box-shadow: 4px 4px 1600px 1600px rgba(0, 0, 0, 0.85);
+	box-shadow: 4px 4px 1600px 1600px rgba(0, 0, 0, 0.95);
+	border: 1px solid var(--border-color);
 
 	&_top {
 		width: 100%;

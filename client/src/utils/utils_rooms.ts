@@ -1,8 +1,9 @@
-import { RoomValues } from "../components/rooms/types";
-import { API_ENDPOINTS, BASE_URL, currentEnv } from "./utils_env";
+import { JoinValues, RoomValues } from "../components/rooms/types";
+import { roomsEndpoints, BASE_URL, currentEnv } from "./utils_env";
+import { fetchWithAuth } from "./utils_http";
 
 const createRoom = async (token: string, roomData: RoomValues) => {
-	const url = BASE_URL + API_ENDPOINTS.rooms.create;
+	const url = BASE_URL + roomsEndpoints.create;
 
 	try {
 		const request = await fetch(url, {
@@ -21,4 +22,21 @@ const createRoom = async (token: string, roomData: RoomValues) => {
 	}
 };
 
-export { createRoom };
+const joinRoomAsNewGuest = async (joinValues: JoinValues) => {
+	let url = currentEnv.base + roomsEndpoints.joinAsNewGuest;
+	url += joinValues.roomCode;
+
+	try {
+		const response = await fetchWithAuth(url, {
+			method: "POST",
+			body: joinValues,
+		});
+		console.log("response", response);
+		return response;
+	} catch (error) {
+		console.log("error", error);
+		return error;
+	}
+};
+
+export { createRoom, joinRoomAsNewGuest };

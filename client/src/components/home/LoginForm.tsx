@@ -15,6 +15,8 @@ const customCSS = {
 
 type Props = {
 	values: LoginValues;
+	errorMsg: string;
+	isSubmitting: boolean;
 	loginUser: () => void;
 	onChange: (name: string, value: string) => void;
 };
@@ -29,12 +31,21 @@ const isLoginDisabled = (values: LoginValues) => {
 	return isEmpty || noMinLength;
 };
 
-const LoginForm = ({ values, onChange, loginUser }: Props) => {
-	const isBtnDisabled: boolean = isLoginDisabled(values);
+const LoginForm = ({
+	values,
+	errorMsg,
+	onChange,
+	loginUser,
+	isSubmitting = false,
+}: Props) => {
+	const isBtnDisabled: boolean = isSubmitting || isLoginDisabled(values);
 
 	return (
 		<form className={styles.LoginForm}>
 			<h3 className={styles.LoginForm_title}>Sign in</h3>
+			{errorMsg && (
+				<div className={styles.LoginForm_errorMsg}>Error: {errorMsg}</div>
+			)}
 			<div className={styles.LoginForm_field}>
 				<label htmlFor="username">Username/Email</label>
 				<TextInput
@@ -61,7 +72,7 @@ const LoginForm = ({ values, onChange, loginUser }: Props) => {
 					isDisabled={isBtnDisabled}
 					style={customCSS}
 				>
-					Login
+					{isSubmitting ? "Logging in..." : "Login"}
 				</Button>
 			</div>
 		</form>

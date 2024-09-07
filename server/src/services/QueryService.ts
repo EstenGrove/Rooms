@@ -1,11 +1,33 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { SQLite3DB, SQLITE_DATABASE } from "../db/db";
+import { SQLite3DB } from "../db/db";
+import { Pool, QueryConfig, QueryResult, QueryResultRow } from "pg";
 
 class QueryServicePG {
-	public db: null;
+	public db: Pool;
 
-	constructor(db: null) {
+	constructor(db: Pool) {
 		this.db = db;
+	}
+	async query<T>(
+		queryStr: string,
+		params: Array<any> = []
+	): Promise<T[] | unknown> {
+		try {
+			const result = (await this.db.query(queryStr, params)) as QueryResult;
+			const rows = result.rows as QueryResultRow[];
+			return rows as T[];
+		} catch (error) {
+			return error;
+		}
+	}
+	async queryWithConfig<T>(query: QueryConfig): Promise<T[] | unknown> {
+		try {
+			const result = (await this.db.query(query)) as QueryResult;
+			const rows = result.rows as QueryResultRow[];
+			return rows as T[];
+		} catch (error) {
+			return error;
+		}
 	}
 }
 
@@ -120,4 +142,4 @@ const main = async () => {
 	txtDB.write("Some data to write");
 };
 
-export { QueryService, DataAccessConfig };
+export { QueryService, QueryServicePG, DataAccessConfig };

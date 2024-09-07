@@ -1,44 +1,67 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { TStatus } from "../types";
 import { RootState } from "../../store/store";
-
-export interface CurrentUser {
-	username: string;
-	password: string;
-	displayName: string;
-	token: string;
-	loginDate: string;
-}
-
-export interface CurrentSession {
-	token: string;
-	lastRefreshed: string;
-	isAuthenticated: boolean;
-}
+import { CurrentSession, CurrentUser } from "./types";
+import { loginUser } from "./operations";
+// import { TResponse } from "../../utils/utils_http";
 
 export interface AuthSlice {
 	currentUser: CurrentUser | null;
 	currentSession: CurrentSession | null;
 	status: TStatus;
+	error: string | null;
 }
 
-const initialState: AuthSlice = {
+export const initialState: AuthSlice = {
 	currentUser: null,
 	currentSession: null,
 	status: "IDLE",
+	error: null,
 };
 
 const authSlice = createSlice({
 	name: "auth",
 	initialState: initialState,
-	reducers: {},
+	reducers: {
+		setAuth(state, action) {
+			console.log("action.payload", action.payload);
+			state.currentUser = action.payload.user;
+			state.currentSession = action.payload.session;
+		},
+		setCurrentUser(state, action) {
+			state.currentUser = action.payload;
+		},
+		resetCurrentUser(state) {
+			state.currentUser = null;
+		},
+		resetCurrentSession(state) {
+			state.currentSession = null;
+		},
+		resetAuth() {
+			return initialState;
+		},
+	},
 	extraReducers(builder) {
-		//
-		//
+		builder
+			.addCase(loginUser.pending, (state) => {
+				state.status = "PENDING";
+			})
+			.addCase(loginUser.fulfilled, (state, action) => {
+				state.status = "FULFILLED";
+				state.currentUser = action.payload.data.User as CurrentUser;
+				state.currentSession = action.payload.data.Session as CurrentSession;
+				state.error = action.payload.error;
+			});
 	},
 });
 
+export const { setCurrentUser, setAuth, resetCurrentSession, resetAuth } =
+	authSlice.actions;
+
 export const selectCurrentUser = (state: RootState) =>
 	state.auth.currentUser as CurrentUser;
+export const selectCurrentSession = (state: RootState) =>
+	state.auth.currentSession as CurrentSession;
+export const selectAuthStatus = (state: RootState) => state.auth.status;
 
 export default authSlice.reducer;
