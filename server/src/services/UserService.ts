@@ -68,13 +68,20 @@ class UserService {
 		}
 	}
 	// NOTE: creating a user will auto-insert a user_logins row afterwards!!!
+	// - We're also setting the 'display_name' to the username temporarily.
 	async create(
 		username: string,
 		password: string
 	): Promise<QueryResultRow[] | unknown> {
 		try {
-			const query = `INSERT INTO users (username, password) VALUES ($1, $2)`;
-			const results = await this.#db.query(query, [username, password]);
+			const query = `
+				INSERT INTO users (username, password, display_name)
+				VALUES ($1, $2, $3) RETURNING *`;
+			const results = await this.#db.query(query, [
+				username,
+				password,
+				username,
+			]);
 			const rows = results.rows as QueryResultRow[];
 			return rows;
 		} catch (error: unknown) {
@@ -86,7 +93,9 @@ class UserService {
 		token: string | null = null
 	): Promise<UserLoginSvcResult | unknown> {
 		try {
-			const query = `INSERT INTO user_logins (user_id, security_token) VALUES ($1, $2) RETURNING *`;
+			const query = `
+				INSERT INTO user_logins (user_id, security_token)
+				VALUES ($1, $2) RETURNING *`;
 			const results = (await this.#db.query(query, [
 				userID,
 				token,
@@ -99,17 +108,25 @@ class UserService {
 	}
 	async deauthenticate(userID: string): Promise<UserLoginSvcResult | unknown> {
 		try {
-			const query = `UPDATE user_logins SET is_active = false, logout_date = CURRENT_TIMESTAMP WHERE user_id = ? AND is_active = true RETURNING *`;
+			const query = `
+				UPDATE user_logins
+					SET is_active = false, logout_date = CURRENT_TIMESTAMP
+				WHERE user_id = $1 AND is_active = true
+					RETURNING *`;
 			const results = (await this.#db.query(query, [userID])) as QueryResult;
 			const row = results.rows?.[0] as UserLoginSvcResult;
-			return row;
+			return row as UserLoginSvcResult;
 		} catch (error: unknown) {
 			return error;
 		}
 	}
 	async reactivate(userID: string): Promise<UserSvcResult | unknown> {
 		try {
-			const query = `UPDATE users SET is_active = true WHERE user_id = $1 RETURNING *`;
+			const query = `
+				UPDATE users 
+					SET is_active = true
+				WHERE user_id = $1
+					RETURNING *`;
 			const updatedUser = (await this.#db.query(query, [
 				userID,
 			])) as QueryResult;

@@ -10,6 +10,7 @@ type Props = {
 	onChange: (name: string, value: string) => void;
 	joinRoom: () => void;
 	createAccount: () => void;
+	isSubmitting: boolean;
 };
 
 const customCSS = {
@@ -23,7 +24,13 @@ const customCSS = {
 	},
 };
 
-const JoinRoom = ({ values, onChange, joinRoom, createAccount }: Props) => {
+const JoinRoom = ({
+	values,
+	onChange,
+	joinRoom,
+	createAccount,
+	isSubmitting = false,
+}: Props) => {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const isValid: boolean = isValidForm<JoinValues>(values);
 
@@ -68,10 +75,10 @@ const JoinRoom = ({ values, onChange, joinRoom, createAccount }: Props) => {
 				<div className={styles.JoinRoom_form_actions}>
 					<Button
 						onClick={joinRoom}
-						isDisabled={!isValid}
+						isDisabled={!isValid || isSubmitting}
 						style={customCSS.join}
 					>
-						Join Room
+						{isSubmitting ? "Joining..." : "Join Room"}
 					</Button>
 				</div>
 				<div className={styles.JoinRoom_form_ctaOptions}>

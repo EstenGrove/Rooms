@@ -27,15 +27,31 @@ const login = async (
 		return error;
 	}
 };
+const logout = async (
+	userID: string
+): Promise<TResponse<ILoginResp> | unknown> => {
+	let url: string = currentEnv.base + usersEndpoints.logout;
+	url += "?" + new URLSearchParams({ userID });
+	try {
+		const response = await fetchWithAuth(url);
+		console.log("response", response);
+		return response;
+	} catch (error) {
+		console.log("error", error);
+		return error;
+	}
+};
+
 const signup = async (
 	userSignup: ISignupParams
 ): Promise<TResponse<ISignupResp> | unknown> => {
-	const url: string = currentEnv.base + usersEndpoints.login;
+	const url: string = currentEnv.base + usersEndpoints.signup;
 	try {
 		const response = await fetchWithAuth(url, {
 			method: "POST",
 			body: userSignup,
 		});
+		console.log("response", response);
 		return response;
 	} catch (error) {
 		console.log("error", error);
@@ -54,4 +70,4 @@ const getUserBadgeName = (name: string, maxLength: number = 10): string => {
 	}
 };
 
-export { login, signup, getUserBadgeName };
+export { login, logout, signup, getUserBadgeName };

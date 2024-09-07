@@ -12,12 +12,29 @@ export type TResponse<T> = {
 
 export interface IRequestOpts {
 	method?: "GET" | "POST" | "DELETE" | "PUT";
-	headers?: Headers;
+	headers?: {
+		[key: string]: unknown;
+		Authorization: string;
+	};
 	body?: unknown;
 }
 
-const fetchWithAuth = async (url: URL | string, options?: IRequestOpts) => {
-	const { method = "GET", headers = {}, body } = options as IRequestOpts;
+const defaultGet: IRequestOpts = {
+	method: "GET",
+	headers: {
+		Authorization: btoa(currentEnv.user + ":" + currentEnv.password) as string,
+	},
+};
+
+const fetchWithAuth = async (
+	url: URL | string,
+	options: IRequestOpts = defaultGet
+) => {
+	const {
+		method = "GET",
+		headers = { ...defaultGet.headers },
+		body,
+	} = options as IRequestOpts;
 	try {
 		const request = await fetch(url, {
 			method,

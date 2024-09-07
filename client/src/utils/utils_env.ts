@@ -2,6 +2,8 @@ export interface IEndpoints {
 	rooms: {
 		create: string;
 		join: string;
+		joinAsGuest: string;
+		joinAsNewGuest: string;
 		leave: string;
 	};
 	members: {
@@ -9,6 +11,7 @@ export interface IEndpoints {
 	};
 	users: {
 		login: string;
+		logout: string;
 		signup: string;
 	};
 }
@@ -46,6 +49,8 @@ const API_ENDPOINTS: IEndpoints = {
 	rooms: {
 		create: "/rooms/createRoom",
 		join: "/rooms/joinRoom",
+		joinAsGuest: "/rooms/joinRoomAsGuest/",
+		joinAsNewGuest: "/rooms/joinRoomAsNewGuest/",
 		leave: "/rooms/leaveRoom",
 	},
 	members: {
@@ -53,6 +58,7 @@ const API_ENDPOINTS: IEndpoints = {
 	},
 	users: {
 		login: "/users/login",
+		logout: "/users/logout",
 		signup: "/users/signup",
 	},
 };

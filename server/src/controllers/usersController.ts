@@ -1,57 +1,85 @@
 import { Context } from "hono";
-import { userService } from "../services";
+import { memberService, userLoginService, userService } from "../services";
 import {
 	UserLoginResponse,
 	UserLoginSvcResult,
 	UserSvcResult,
 } from "../services/UserService";
-import { isError, UserNotFoundError } from "../utils/utils_errors";
+import { isError } from "../utils/utils_errors";
 import { ResponseModel } from "../models/ResponseModel";
-import { IUserModel, UserModel } from "../models/UserModel";
-import {
-	ILoginSession,
-	ILoginSessionModel,
-	LoginSessionModel,
-} from "../models/LoginSession";
-import { SessionSvcResult } from "../services/SessionService";
 import {
 	UserLoginClient,
+	UserLoginDB,
 	userLoginNormalizer,
 } from "../utils/data/UserLoginNormalizer";
-import { userNormalizer } from "../utils/data/UserNormalizer";
+import {
+	UserClient,
+	UserDB,
+	userNormalizer,
+} from "../utils/data/UserNormalizer";
+import {
+	MemberClient,
+	MemberDB,
+	memberNormalizer,
+} from "../utils/data/MemberNormalizer";
 
 const createUser = async (ctx: Context) => {
 	const body = await ctx.req.json();
 	const { username, password } = body;
 
-	const newUserAccount = await userService.create(username, password);
-	const userInfo = (await userService.login(
-		username,
-		password
-	)) as UserLoginResponse;
+	// check if user/username already exists
+	const userAlreadyExists = (await userService.getByUsername(
+		username
+	)) as UserSvcResult;
 
-	console.log("newUserAccount", newUserAccount);
-	console.log("userInfo", userInfo);
-
-	if (userInfo instanceof Error) {
+	if (userAlreadyExists || isError(userAlreadyExists)) {
 		return ctx.json({
 			Status: "FAILED",
-			Message: userInfo,
+			ErrorMsg: "Username is taken. Try another.",
 			Data: {
-				user: null,
-				login: null,
-			},
-		});
-	} else {
-		return ctx.json({
-			Status: "SUCCESS",
-			Message: "User account was created!",
-			Data: {
-				User: userInfo.user,
-				Session: userInfo.login,
+				User: null,
+				Session: null,
+				Member: null,
 			},
 		});
 	}
+
+	// Create a new user, member & login session record: set default room, displayName values
+	const newUserAcct = (await userService.create(username, password)) as UserDB;
+	const newMemberAcct = (await memberService.create(
+		username,
+		1,
+		false
+	)) as MemberDB;
+	// fetch the auto-created login session record for the new user
+	const newLoginRecord = (await userLoginService.getByUserID(
+		newUserAcct.user_id
+	)) as UserLoginDB;
+
+	// normalized data
+	const newUser: UserClient = userNormalizer.toClientOne(
+		newUserAcct
+	) as UserClient;
+	const newMember: MemberClient = memberNormalizer.toClientOne(
+		newMemberAcct as MemberDB
+	);
+	const newLogin: UserLoginClient = userLoginNormalizer.toClientOne(
+		newLoginRecord as UserLoginDB
+	) as UserLoginClient;
+
+	// ##TODO:
+	// - Add JWT generator
+	// - Set JWT to httponly cookie
+
+	return ctx.json({
+		Status: "SUCCESS",
+		Message: "Username is available!",
+		Data: {
+			User: newUser,
+			Session: newLogin,
+			Member: newMember,
+		},
+	});
 };
 
 const loginUser = async (ctx: Context) => {
@@ -92,4 +120,31 @@ const loginUser = async (ctx: Context) => {
 	return ctx.json(resp);
 };
 
-export { createUser, loginUser };
+const logoutUser = async (ctx: Context) => {
+	const userID = ctx.req.query("userID") as string;
+	const session = (await userService.logout(userID)) as UserLoginSvcResult;
+	const wasLoggedOut: boolean = !!session as boolean;
+	const logoutDate = session.logout_date as string;
+
+	console.log("userID", userID);
+	console.log("session", session);
+
+	if (!wasLoggedOut || isError(session)) {
+		return ctx.json({
+			Status: "FAILED",
+			Message: "Logout action failed for " + userID,
+			ErrorMsg: session,
+		});
+	} else {
+		return ctx.json({
+			Status: "SUCCESS",
+			Message: `[${userID}] was logged out at: ${logoutDate} `,
+			Data: {
+				UserID: userID,
+				Session: session,
+			},
+		});
+	}
+};
+
+export { createUser, loginUser, logoutUser };

@@ -23,6 +23,11 @@ const authSlice = createSlice({
 	name: "auth",
 	initialState: initialState,
 	reducers: {
+		setAuth(state, action) {
+			console.log("action.payload", action.payload);
+			state.currentUser = action.payload.user;
+			state.currentSession = action.payload.session;
+		},
 		setCurrentUser(state, action) {
 			state.currentUser = action.payload;
 		},
@@ -50,7 +55,7 @@ const authSlice = createSlice({
 	},
 });
 
-export const { setCurrentUser, resetCurrentSession, resetAuth } =
+export const { setCurrentUser, setAuth, resetCurrentSession, resetAuth } =
 	authSlice.actions;
 
 export const selectCurrentUser = (state: RootState) =>

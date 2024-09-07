@@ -1,28 +1,25 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../../css/home/GetStarted.module.scss";
-import LoginForm from "./LoginForm";
-import SignupForm from "./SignupForm";
-import Button from "../shared/Button";
-import Modal from "../shared/Modal";
-import JoinRoom from "../rooms/JoinRoom";
 import { JoinValues } from "../rooms/types";
 import { useAppDispatch } from "../../store/store";
-import { useSelector } from "react-redux";
-import {
-	selectCurrentUser,
-	setCurrentUser,
-} from "../../features/auth/authSlice";
+import { setAuth } from "../../features/auth/authSlice";
+import { TResponse } from "../../utils/utils_http";
 import {
 	ILoginResp,
 	ISignupResp,
 	login,
 	signup,
 } from "../../utils/utils_users";
-import { TResponse } from "../../utils/utils_http";
+import { joinRoomAsNewGuest } from "../../utils/utils_rooms";
+import LoginForm from "./LoginForm";
+import SignupForm from "./SignupForm";
+import Button from "../shared/Button";
+import Modal from "../shared/Modal";
+import JoinRoom from "../rooms/JoinRoom";
 
-// SIGN IN
-// SIGNUP
+// SIGN-IN
+// SIGN-UP
 // CREATE ROOM
 // JOIN ROOM
 
@@ -65,11 +62,9 @@ const initialSignup: SignupValues = {
 const GetStarted = () => {
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
-	const currentUser = useSelector(selectCurrentUser);
 	// params
 	const [params, setParams] = useSearchParams();
 	const tid: string = params.get("tab") || "signup";
-	const [authError, setAuthError] = useState<string>("");
 	// modals
 	const [showJoinRoomModal, setShowJoinRoomModal] = useState<boolean>(false);
 	const [activeForm, setActiveForm] = useState<ActiveForm>(tid as ActiveForm);
@@ -77,7 +72,9 @@ const GetStarted = () => {
 	const [loginValues, setLoginValues] = useState<LoginValues>(initialLogin);
 	const [signupValues, setSignupValues] = useState<SignupValues>(initialSignup);
 	const [joinRoomValues, setJoinRoomValues] = useState<JoinValues>(initialJoin);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	// validation results
+	const [authError, setAuthError] = useState<string>("");
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
 	const handleLoginForm = (name: string, value: string) => {
 		setLoginValues({
@@ -115,11 +112,13 @@ const GetStarted = () => {
 		setIsSubmitting(false);
 
 		const { User, Session } = loginInfo.Data as ILoginResp;
-		dispatch(setCurrentUser({ user: User, session: Session }));
+		dispatch(setAuth({ user: User, session: Session }));
 		navigate("/dashboard/rooms");
 	};
 	const userSignup = async () => {
 		const signupInfo = (await signup(signupValues)) as TResponse<ISignupResp>;
+
+		console.log("signupInfo", signupInfo);
 
 		if (signupInfo.ErrorMsg) {
 			setIsSubmitting(false);
@@ -129,8 +128,18 @@ const GetStarted = () => {
 		setIsSubmitting(false);
 
 		const { User, Session } = signupInfo.Data as ISignupResp;
-		dispatch(setCurrentUser({ user: User, session: Session }));
+		dispatch(setAuth({ user: User, session: Session }));
 		navigate("/dashboard/rooms");
+	};
+
+	const joinNewRoom = async () => {
+		const joinData = await joinRoomAsNewGuest(joinRoomValues);
+
+		console.log("joinData", joinData);
+	};
+	const cancelJoinAndSignup = () => {
+		closeJoinRoomModal();
+		changeForms("signup");
 	};
 
 	const openJoinRoomModal = () => {
@@ -141,13 +150,23 @@ const GetStarted = () => {
 		setJoinRoomValues(initialJoin);
 	};
 
-	const joinNewRoom = async () => {
-		// do stuff
-	};
-	const cancelJoinAndSignup = () => {
-		closeJoinRoomModal();
-		changeForms("signup");
-	};
+	// reset the error message after 5s
+	useEffect(() => {
+		let isMounted = true;
+		if (!isMounted) return;
+
+		let timerID: ReturnType<typeof setTimeout>;
+		if (!!authError && !isSubmitting) {
+			timerID = setTimeout(() => {
+				setAuthError("");
+			}, 5000);
+		}
+
+		return () => {
+			isMounted = false;
+			clearTimeout(timerID);
+		};
+	}, [authError, isSubmitting]);
 
 	return (
 		<div className={styles.GetStarted}>
@@ -172,6 +191,7 @@ const GetStarted = () => {
 					<SignupForm
 						values={signupValues}
 						onChange={handleSignupForm}
+						errorMsg={authError as string}
 						signupUser={() => {
 							setIsSubmitting(true);
 							userSignup();
@@ -211,7 +231,11 @@ const GetStarted = () => {
 					<JoinRoom
 						values={joinRoomValues}
 						onChange={handleJoinForm}
-						joinRoom={joinNewRoom}
+						isSubmitting={isSubmitting}
+						joinRoom={() => {
+							setIsSubmitting(true);
+							joinNewRoom();
+						}}
 						createAccount={cancelJoinAndSignup}
 					/>
 				</Modal>
