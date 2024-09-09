@@ -138,6 +138,17 @@ class RoomsService {
 	constructor(db: Pool) {
 		this.#db = db;
 	}
+	async getRoomsByUser(userID: string) {
+		try {
+			const query = `SELECT * FROM get_user_rooms($1)`;
+			const results = await this.#db.query(query, [userID]);
+			const rows = results?.rows ?? "NO RESULTS";
+			return rows;
+		} catch (error) {
+			console.log("error", error);
+			return error;
+		}
+	}
 	async get(idOrCode: string | number) {
 		if (typeof idOrCode === "number") {
 			return await this.getByID(idOrCode);
@@ -194,6 +205,10 @@ class RoomsService {
 				SET room_id = $1, is_alive = true
 				WHERE member_id = $2
 				RETURNING *`;
+			const sQuery = `
+				INSERT INTO sessions (room_id, )
+			`;
+			// const sResult = await this.#db.query()
 			const mResult = (await this.#db.query(memberQuery, [
 				roomID,
 				memberID,

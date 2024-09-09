@@ -20,6 +20,8 @@ export interface UserLoginSvcResult {
 	is_active: boolean;
 	login_date: string;
 	logout_date: string | null;
+	last_refreshed_date: string | null;
+	expiry: string;
 }
 // Combined data including 'users' record, 'user_logins' record & any possible errors as a string
 export interface UserLoginResponse {
@@ -85,6 +87,27 @@ class UserService {
 			const rows = results.rows as QueryResultRow[];
 			return rows;
 		} catch (error: unknown) {
+			return error;
+		}
+	}
+	async refreshAuth(
+		userID: string,
+		token: string | null = null
+	): Promise<UserLoginSvcResult | unknown> {
+		try {
+			const query = `
+				INSERT INTO user_logins (user_id, security_token)
+				VALUES ($1, $2)
+				ON CONFLICT (user_id, security_token)
+				DO UPDATE SET
+				last_refreshed_date = CURRENT_TIMESTAMP,
+				expiry = CURRENT_TIMESTAMP + INTERVAL '1 hour' * 5
+				WHERE user_id = $1 AND security_token = $2 RETURNING *;
+			`;
+			const results = await this.#db.query(query, [userID, token]);
+			const row = results?.rows?.[0] as UserLoginSvcResult;
+			return row;
+		} catch (error) {
 			return error;
 		}
 	}

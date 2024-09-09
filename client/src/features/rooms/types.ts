@@ -13,6 +13,7 @@ export interface Room {
 
 export interface CurrentRoom {
 	room: Room | null;
+	member: RoomMember | null;
 	members: RoomMember[];
 	session: RoomSession | null;
 }

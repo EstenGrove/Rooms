@@ -9,6 +9,7 @@ import UserHome from "./components/users/UserHome";
 import Dashboard from "./pages/Dashboard";
 import YourSettings from "./pages/YourSettings";
 import RoomSession from "./pages/RoomSession";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
 	return (
@@ -20,6 +21,7 @@ function App() {
 						{/* PUBLIC ROOM SESSION */}
 						<Route path="sessions/:id" element={<RoomSession />} />
 						{/* PRIVATE ROUTES */}
+						{/* <Route path="dashboard" element={<Dashboard />}> */}
 						<Route path="dashboard" element={<Dashboard />}>
 							<Route path="user/" element={<UserHome />} />
 							<Route path="rooms/" element={<YourRooms />} />

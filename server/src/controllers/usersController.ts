@@ -6,7 +6,7 @@ import {
 	UserSvcResult,
 } from "../services/UserService";
 import { isError } from "../utils/utils_errors";
-import { ResponseModel } from "../models/ResponseModel";
+import { getResponseOk, ResponseModel } from "../models/ResponseModel";
 import {
 	UserLoginClient,
 	UserLoginDB,
@@ -147,4 +147,28 @@ const logoutUser = async (ctx: Context) => {
 	}
 };
 
-export { createUser, loginUser, logoutUser };
+const refreshLogin = async (ctx: Context) => {
+	const userID = ctx.req.query("userID") as string;
+	const loginSession = (await userService.authenticate(userID)) as UserLoginDB;
+
+	const updatedSession = userLoginNormalizer.toClientOne(
+		loginSession
+	) as UserLoginClient;
+	const response = getResponseOk({
+		UserLogin: updatedSession,
+	});
+	return ctx.json(response);
+};
+
+const getUser = async (ctx: Context) => {
+	const userID = ctx.req.query("userID") as string;
+	const userData = (await userService.getByID(userID)) as UserDB;
+	const currentUser = userNormalizer.toClientOne(userData) as UserClient;
+
+	const response = getResponseOk({
+		User: currentUser,
+	});
+	return ctx.json(response);
+};
+
+export { createUser, loginUser, logoutUser, refreshLogin, getUser };

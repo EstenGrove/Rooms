@@ -1,4 +1,10 @@
-import { format, formatDistance } from "date-fns";
+import {
+	differenceInHours,
+	differenceInMinutes,
+	format,
+	formatDistance,
+	isBefore,
+} from "date-fns";
 
 export type TDateFormats = {
 	long: string;
@@ -78,6 +84,35 @@ const getRelativeDistance = (date: Date | string): string => {
 	return formatDistance(date, now) + " ago";
 };
 
+// COMPARATORS
+// is 1st arg before 2nd arg?
+const isBeforeDate = (target: Date | string, date: Date | string): boolean => {
+	const before: boolean = isBefore(target, date);
+	return before;
+};
+// get difference in minutes between two dates
+const diffInMins = (
+	date: Date | string,
+	compareDate: Date | string
+): number => {
+	const base = new Date(date);
+	const baseCompare = new Date(compareDate);
+	const diff = differenceInMinutes(base, baseCompare);
+
+	return Math.abs(diff);
+};
+// get difference in minutes between two dates
+const diffInHours = (
+	date: Date | string,
+	compareDate: Date | string
+): number => {
+	const base = new Date(date);
+	const baseCompare = new Date(compareDate);
+	const diff = differenceInHours(base, baseCompare);
+
+	return Math.abs(diff);
+};
+
 export {
 	DATE_FORMATS,
 	TIME_FORMATS,
@@ -86,4 +121,7 @@ export {
 	formatTime,
 	formatDateTime,
 	getRelativeDistance,
+	isBeforeDate,
+	diffInHours,
+	diffInMins,
 };

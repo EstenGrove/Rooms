@@ -1,8 +1,8 @@
 import styles from "../../css/dashboard/DashboardNav.module.scss";
 import sprite from "../../assets/icons/rooms.svg";
 import UserBadge from "../users/UserBadge";
-import { CurrentUser } from "../../features/auth/authSlice";
 import { NavLink } from "react-router-dom";
+import { CurrentUser } from "../../features/auth/types";
 
 type Props = {
 	currentUser: CurrentUser;
@@ -34,11 +34,12 @@ const LogoutButton = ({ logout }: LogoutBtnProps) => {
 };
 
 const DashboardNav = ({ currentUser, logoutUser }: Props) => {
+	console.log("currentUser", currentUser);
 	const { displayName } = currentUser;
 
 	return (
 		<nav className={styles.DashboardNav}>
-			<UserBadge displayName={displayName} />
+			<UserBadge displayName={displayName as string} />
 			<SettingsButton />
 			<LogoutButton logout={logoutUser} />
 		</nav>

@@ -1,7 +1,7 @@
 export interface RoomSession {
 	sessionID: number;
 	roomID: number;
-	memberIDs: number[];
+	memberIDs: number;
 	isActive: boolean;
 	isAlive: boolean;
 	sessionStartDate: string | null;

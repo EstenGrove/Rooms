@@ -21,7 +21,6 @@
 	}
 	&_actions {
 		width: 80%;
-		margin-top: 2rem;
 		@include flex_row(flex-end, center);
 		gap: 0 2rem;
 	}

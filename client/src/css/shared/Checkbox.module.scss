@@ -1,0 +1,77 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+$checkbox: 1.8rem;
+
+.Checkbox {
+	position: relative;
+	width: auto;
+	@include flex_row(flex-start, center);
+
+	&_input {
+		width: auto;
+		visibility: hidden;
+		position: relative;
+	}
+	&_label {
+		font-size: 1.6rem;
+		align-self: center;
+		margin-left: 1rem;
+		font-size: 1.8rem;
+		font-weight: 400;
+
+		& span {
+			height: 100%;
+			display: flex;
+			align-self: center;
+			margin-top: -0.15rem;
+		}
+
+		&::before {
+			width: $checkbox;
+			height: $checkbox;
+			position: absolute;
+			display: block;
+			content: "";
+			top: 0.2rem;
+			left: 0;
+			border: 1px solid var(--accent);
+			border-radius: 0.3rem;
+			&:hover {
+				cursor: pointer;
+			}
+		}
+		&::after {
+			width: $checkbox;
+			height: $checkbox;
+			position: absolute;
+			display: none;
+			// content: "✓";
+			content: "\2713";
+			font-size: 1.8rem;
+			font-weight: bold;
+			top: -0.2rem;
+			left: 0.15rem;
+			border-radius: 0.5rem;
+			color: #fff;
+		}
+	}
+}
+
+input[type="checkbox"]:checked + label::after {
+	display: block;
+}
+
+input[type="checkbox"]:checked + label::before {
+	background-color: var(--accent);
+}
+
+input[type="checkbox"]:disabled + label,
+input[type="checkbox"]:disabled + label::after {
+	opacity: 0.3;
+}
+input[type="checkbox"]:disabled + label:hover {
+	opacity: 0.3;
+	cursor: not-allowed;
+}

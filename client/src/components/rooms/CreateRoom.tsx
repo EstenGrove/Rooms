@@ -2,11 +2,13 @@ import { useRef, useEffect } from "react";
 import styles from "../../css/rooms/CreateRoom.module.scss";
 import TextInput from "../shared/TextInput";
 import Button from "../shared/Button";
+import Checkbox from "../shared/Checkbox";
 
 type Props = {
 	roomValues: {
 		roomName: string;
 		memberName: string;
+		startRoom: boolean;
 	};
 	onChange: (name: string, value: string) => void;
 	createRoom: () => void;
@@ -56,6 +58,7 @@ const CreateRoom = ({
 					onChange={onChange}
 					placeholder="Sprint-16 Room..."
 					inputRef={inputRef}
+					autoComplete="off"
 				/>
 			</div>
 			<div className={styles.CreateRoom_field}>
@@ -67,6 +70,15 @@ const CreateRoom = ({
 					value={roomValues.memberName}
 					onChange={onChange}
 					placeholder="Jessica H..."
+				/>
+			</div>
+			<div className={styles.CreateRoom_field}>
+				<Checkbox
+					id="startRoom"
+					name="startRoom"
+					value={roomValues.startRoom}
+					onChange={(name, value) => onChange(name, String(value))}
+					label="Start Room (auto starts)"
 				/>
 			</div>
 			<div className={styles.CreateRoom_actions}>

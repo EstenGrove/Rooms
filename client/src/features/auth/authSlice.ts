@@ -1,22 +1,19 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { TStatus } from "../types";
 import { RootState } from "../../store/store";
 import { CurrentSession, CurrentUser } from "./types";
-import { loginUser } from "./operations";
-// import { TResponse } from "../../utils/utils_http";
+import { fetchUser } from "./operations";
 
 export interface AuthSlice {
 	currentUser: CurrentUser | null;
 	currentSession: CurrentSession | null;
 	status: TStatus;
-	error: string | null;
 }
 
 export const initialState: AuthSlice = {
 	currentUser: null,
 	currentSession: null,
 	status: "IDLE",
-	error: null,
 };
 
 const authSlice = createSlice({
@@ -24,13 +21,15 @@ const authSlice = createSlice({
 	initialState: initialState,
 	reducers: {
 		setAuth(state, action) {
-			console.log("action.payload", action.payload);
 			state.currentUser = action.payload.user;
 			state.currentSession = action.payload.session;
 		},
 		setCurrentUser(state, action) {
 			state.currentUser = action.payload;
 		},
+		// refreshUserAuth(state, action) {
+		// 	// ##TODO
+		// },
 		resetCurrentUser(state) {
 			state.currentUser = null;
 		},
@@ -43,15 +42,16 @@ const authSlice = createSlice({
 	},
 	extraReducers(builder) {
 		builder
-			.addCase(loginUser.pending, (state) => {
+			.addCase(fetchUser.pending, (state: AuthSlice) => {
 				state.status = "PENDING";
 			})
-			.addCase(loginUser.fulfilled, (state, action) => {
-				state.status = "FULFILLED";
-				state.currentUser = action.payload.data.User as CurrentUser;
-				state.currentSession = action.payload.data.Session as CurrentSession;
-				state.error = action.payload.error;
-			});
+			.addCase(
+				fetchUser.fulfilled,
+				(state: AuthSlice, action: PayloadAction<CurrentUser>) => {
+					state.status = "FULFILLED";
+					state.currentUser = action.payload;
+				}
+			);
 	},
 });
 
@@ -63,5 +63,12 @@ export const selectCurrentUser = (state: RootState) =>
 export const selectCurrentSession = (state: RootState) =>
 	state.auth.currentSession as CurrentSession;
 export const selectAuthStatus = (state: RootState) => state.auth.status;
+
+export const selectIsLoadingState = (state: RootState) => {
+	const authLoading: boolean = state.auth.status === "PENDING";
+	const roomsLoading: boolean = state.rooms.status === "PENDING";
+
+	return authLoading || roomsLoading;
+};
 
 export default authSlice.reducer;

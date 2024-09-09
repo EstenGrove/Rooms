@@ -16,6 +16,7 @@
 	@include glassy();
 	box-shadow: 4px 4px 1600px 1600px rgba(0, 0, 0, 0.95);
 	border: 1px solid var(--border-color);
+	z-index: 100;
 
 	&_top {
 		width: 100%;

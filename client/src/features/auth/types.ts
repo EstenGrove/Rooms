@@ -13,6 +13,9 @@ export interface CurrentUser {
 
 export interface CurrentSession {
 	token: string;
+	userID: string;
+	sessionID: number;
+	sessionExpiry: string;
 	lastRefreshed: string;
 	isAuthenticated: boolean;
 }

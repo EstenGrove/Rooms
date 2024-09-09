@@ -13,33 +13,37 @@ import {
 	MemberDB,
 	memberNormalizer,
 } from "../utils/data/MemberNormalizer";
+import { ValidateExec } from "../utils/utils_validation";
+import { getResponseError, getResponseOk } from "../models/ResponseModel";
+import { SessionDB, sessionNormalizer } from "../utils/data/SessionNormalizer";
+
+const validator = new ValidateExec();
 
 // create a new room
 // - member should be an ID not a name, as the member should be created separately
+
+// 1. Create Room
+// 2. Update member's name, if different
 const createRoom = async (ctx: Context) => {
 	const body = await ctx.req.json();
-	const { roomName, memberName, isAlive = false } = body;
+	const { userID, memberID, roomName, memberName, isAlive = false } = body;
 
-	const newRoom = (await roomService.create(
+	const rawRoom = (await roomService.create(
 		roomName as string,
 		isAlive as boolean
 	)) as RoomSvcResult;
 
+	// normalized data
+	const newRoom = roomNormalizer.toClientOne(rawRoom) as RoomClient;
+
 	console.log("Was Created:", newRoom);
 
-	return ctx.json({
-		Route: "POST /createRoom",
-		Room: {
-			RoomName: roomName,
-			RoomID: newRoom.room_id,
-			RoomCode: newRoom.room_code,
-			IsAlive: newRoom.is_alive,
-			CreatedDate: newRoom.created_date,
-		},
-		MemberName: memberName,
-		IsAlive: isAlive,
-		WasCreated: `Room was created: ${newRoom.room_id}`,
+	const response = getResponseOk({
+		Room: newRoom,
+		IsAlive: newRoom.isAlive,
 	});
+
+	return ctx.json(response);
 };
 
 const joinRoom = async (ctx: Context) => {
@@ -122,10 +126,28 @@ const joinRoomAsGuest = async (ctx: Context) => {
 const joinRoomAsNewGuest = async (ctx: Context) => {
 	const { displayName: memberName } = await ctx.req.json();
 	const roomCode = ctx.req.param("roomCode") as string;
-	console.log("memberName", memberName);
+
+	if (!validator.isGuid(roomCode)) {
+		const errMsg: string = "Room code is not valid: " + roomCode;
+		const errResponse = getResponseError(new Error(errMsg), {
+			Member: null,
+			Room: null,
+		});
+
+		return ctx.json(errResponse);
+	}
 
 	// get room & create new member
 	const roomRecord = (await roomService.getByCode(roomCode)) as RoomDB;
+
+	if (roomRecord instanceof Error) {
+		const errResponse = getResponseError(roomRecord, {
+			Member: null,
+			Room: null,
+		});
+
+		return ctx.json(errResponse);
+	}
 
 	const memberRecord = (await memberService.create(
 		memberName,
@@ -139,24 +161,56 @@ const joinRoomAsNewGuest = async (ctx: Context) => {
 	const newMember = memberNormalizer.toClientOne(memberRecord) as MemberClient;
 
 	if (memberRecord instanceof Error) {
-		return ctx.json({
-			Status: "FAILED",
-			Message: memberRecord.message,
-			StackTrace: memberRecord.stack,
-			Data: {
-				Member: null,
-				Room: null,
-			},
+		const errMsg: string =
+			"Display names MUST be unique per room. Consider adding an initial.";
+		const errResponse = getResponseError(new Error(errMsg), {
+			Member: null,
+			Room: null,
 		});
+		return ctx.json(errResponse);
 	}
-	return ctx.json({
-		Status: "SUCCESS",
-		Message: `New member was created & added to room!`,
-		Data: {
-			Member: newMember,
-			Room: room,
-		},
+
+	const okResponse = getResponseOk({
+		Member: newMember,
+		Room: room,
 	});
+
+	// Success: member was created & added to room
+	return ctx.json({
+		...okResponse,
+		Message: "New member was created & added to room!",
+	});
+};
+
+const getLiveRoom = async (ctx: Context) => {
+	const { roomCode, memberID } = ctx.req.query();
+	// Result: Room, Member, Session, Members
+	const roomDB = (await roomService.getByCode(roomCode)) as RoomDB;
+	const memberDB = (await memberService.getByID(Number(memberID))) as MemberDB;
+	const sessionDB = (await sessionService.getByRoomID(
+		roomDB?.room_id
+	)) as SessionDB;
+	const roomMembersDB = (await roomService.getMembers(
+		roomDB?.room_id
+	)) as MemberDB[];
+
+	// start session if not already
+	// const started = await sessionService.start(sessionDB?.session_id);
+
+	// normalized data
+	const liveRoom = roomNormalizer.toClientOne(roomDB);
+	const member = memberNormalizer.toClientOne(memberDB);
+	const session = sessionNormalizer.toClientOne(sessionDB);
+	const members = memberNormalizer.toClient(roomMembersDB);
+
+	const response = getResponseOk({
+		Member: member,
+		Session: session,
+		Members: members,
+		Room: liveRoom,
+	});
+
+	return ctx.json(response);
 };
 
 const getRoom = async (ctx: Context) => {
@@ -184,4 +238,21 @@ const getRoom = async (ctx: Context) => {
 	});
 };
 
-export { createRoom, joinRoom, joinRoomAsGuest, joinRoomAsNewGuest, getRoom };
+const getUserRooms = async (ctx: Context) => {
+	const userID = ctx.req.query("userID") as string;
+	const rooms = await roomService.getRoomsByUser(userID);
+
+	console.log("rooms", rooms);
+
+	return ctx.text("Response");
+};
+
+export {
+	createRoom,
+	joinRoom,
+	joinRoomAsGuest,
+	joinRoomAsNewGuest,
+	getRoom,
+	getLiveRoom,
+	getUserRooms,
+};
