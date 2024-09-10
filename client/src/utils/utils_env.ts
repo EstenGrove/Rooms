@@ -57,7 +57,7 @@ const API_ENDPOINTS: IEndpoints = {
 		joinAsNewGuest: "/rooms/joinRoomAsNewGuest/",
 		leave: "/rooms/leaveRoom",
 		getLiveRoom: "/rooms/liveRoom",
-		getRooms: "/rooms/getUserRooms",
+		getRooms: "/rooms/getRooms",
 	},
 	members: {
 		create: "/members/createMember",

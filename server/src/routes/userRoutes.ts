@@ -13,7 +13,7 @@ const app: Hono = new Hono();
 app.post("/login", loginUser);
 app.get("/logout", logoutUser);
 app.post("/signup", createUser);
-app.get("/refresh", refreshLogin);
+app.post("/refresh", refreshLogin);
 app.get("/getUser", getUser);
 
 export default app;

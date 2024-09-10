@@ -1,0 +1,16 @@
+@import "../../sass/variables";
+@import "../../sass/mixins";
+@import "../../sass/custom";
+
+.Loading {
+	width: 100%;
+	height: auto;
+	@include flex_col(center, center);
+
+	&_inner {
+		@include flex_row(center, center);
+		font-size: 1.6rem;
+		color: var(--blueGrey200);
+		font-size: 2rem;
+	}
+}

@@ -59,6 +59,7 @@ const roomsSlice = createSlice({
 			.addCase(
 				fetchUserRooms.fulfilled,
 				(state: RoomsSlice, action: PayloadAction<Room[]>) => {
+					state.status = "FULFILLED";
 					state.rooms = action.payload;
 				}
 			);

@@ -42,11 +42,18 @@ class UserService {
 		this.#db = db;
 	}
 
-	async getByID(userID: string, isActive: boolean = true) {
+	async getByID(
+		userID: string,
+		isActive: boolean = true
+	): Promise<UserSvcResult | unknown> {
 		try {
-			const query: string = `SELECT * FROM users WHERE is_active = $1 AND user_id = $2`;
-			const resp = await this.#db.query(query, [isActive, userID]);
-			return resp;
+			const query: string = `SELECT * FROM users WHERE user_id = $1 AND  is_active = $2`;
+			const resp = (await this.#db.query(query, [
+				userID,
+				isActive,
+			])) as QueryResult;
+			const row = resp?.rows?.[0] as UserSvcResult;
+			return row;
 		} catch (error) {
 			console.log("error", error);
 			return error;
@@ -98,11 +105,7 @@ class UserService {
 			const query = `
 				INSERT INTO user_logins (user_id, security_token)
 				VALUES ($1, $2)
-				ON CONFLICT (user_id, security_token)
-				DO UPDATE SET
-				last_refreshed_date = CURRENT_TIMESTAMP,
-				expiry = CURRENT_TIMESTAMP + INTERVAL '1 hour' * 5
-				WHERE user_id = $1 AND security_token = $2 RETURNING *;
+				RETURNING *;
 			`;
 			const results = await this.#db.query(query, [userID, token]);
 			const row = results?.rows?.[0] as UserLoginSvcResult;

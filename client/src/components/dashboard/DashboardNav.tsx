@@ -34,8 +34,7 @@ const LogoutButton = ({ logout }: LogoutBtnProps) => {
 };
 
 const DashboardNav = ({ currentUser, logoutUser }: Props) => {
-	console.log("currentUser", currentUser);
-	const { displayName } = currentUser;
+	const displayName = currentUser?.displayName ?? "";
 
 	return (
 		<nav className={styles.DashboardNav}>

@@ -6,6 +6,8 @@ export interface UserLoginDB {
 	is_active: boolean;
 	login_date: string;
 	logout_date: string | null;
+	expiry: string;
+	last_refreshed_date: string;
 }
 // Client-side format
 export interface UserLoginClient {
@@ -15,6 +17,8 @@ export interface UserLoginClient {
 	isActive: boolean;
 	loginDate: string;
 	logoutDate: string | null;
+	expiry: string;
+	lastRefreshedDate: string;
 }
 
 class UserLoginNormalizer {
@@ -26,6 +30,8 @@ class UserLoginNormalizer {
 			is_active: record.isActive,
 			login_date: record.loginDate,
 			logout_date: record.logoutDate,
+			expiry: record.expiry,
+			last_refreshed_date: record.lastRefreshedDate,
 		};
 
 		return dbRecord;
@@ -39,6 +45,8 @@ class UserLoginNormalizer {
 			isActive: record.is_active,
 			loginDate: record.login_date,
 			logoutDate: record.logout_date,
+			expiry: record.expiry,
+			lastRefreshedDate: record.last_refreshed_date,
 		};
 
 		return clientRecord;

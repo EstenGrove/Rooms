@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
 import styles from "../css/pages/Dashboard.module.scss";
+import { useCallback, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
@@ -10,12 +10,6 @@ import {
 	selectCurrentUser,
 	selectIsLoadingState,
 } from "../features/auth/authSlice";
-import DashboardNav from "../components/dashboard/DashboardNav";
-import DashboardHeader from "../components/dashboard/DashboardHeader";
-import DashboardTabs from "../components/layout/DashboardTabs";
-import CreateRoomButton from "../components/rooms/CreateRoomButton";
-import Modal from "../components/shared/Modal";
-import CreateRoom from "../components/rooms/CreateRoom";
 import {
 	AuthSession,
 	clearAuthFromStorage,
@@ -23,6 +17,13 @@ import {
 } from "../utils/utils_auth";
 import { useAuthSession } from "../hooks/useAuthSession";
 import { fetchUserRooms } from "../features/rooms/operations";
+import Modal from "../components/shared/Modal";
+import CreateRoom from "../components/rooms/CreateRoom";
+import DashboardTabs from "../components/layout/DashboardTabs";
+import DashboardNav from "../components/dashboard/DashboardNav";
+import CreateRoomButton from "../components/rooms/CreateRoomButton";
+import DashboardHeader from "../components/dashboard/DashboardHeader";
+import Loading from "../components/shared/Loading";
 
 interface NewRoomValues {
 	roomName: string;
@@ -32,17 +33,18 @@ interface NewRoomValues {
 
 const Dashboard = () => {
 	const navigate = useNavigate();
+	const authCache: AuthSession = getAuthFromStorage();
 	const dispatch = useAppDispatch();
-	// const { authSession } = useAuthSession({
-	// 	onSuccess: (session: AuthSession) => {
-	// 		// do something
-	// 		console.log("Succcess!");
-	// 	},
-	// 	onReject: () => {
-	// 		console.log("Reject");
-	// 		navigate("/?tab=login");
-	// 	},
-	// });
+	useAuthSession({
+		onSuccess: (session: AuthSession) => {
+			// do something
+			console.log("Success!", session);
+		},
+		onReject: () => {
+			console.log("Reject");
+			navigate("/?tab=login");
+		},
+	});
 	const isLoading: boolean = useSelector(selectIsLoadingState);
 	const currentUser: CurrentUser = useSelector(selectCurrentUser);
 
@@ -72,7 +74,7 @@ const Dashboard = () => {
 	};
 
 	const logoutUser = async () => {
-		const userID = currentUser.userID || "";
+		const userID = currentUser?.userID || (authCache.userID as string);
 		const userLogout = await logout(userID);
 
 		if (!userLogout) {
@@ -95,8 +97,6 @@ const Dashboard = () => {
 		const userID = (currentUser?.userID || authCache?.userID) as string;
 		if (!userID) return;
 
-		console.log("userID", userID);
-		// dispatch()
 		dispatch(fetchUserRooms(userID));
 	}, [currentUser?.userID, dispatch]);
 
@@ -116,21 +116,23 @@ const Dashboard = () => {
 
 	return (
 		<div className={styles.Dashboard}>
-			{isLoading && <div>Loading details...please wait..</div>}
+			<div className={styles.Dashboard_loader}>
+				{isLoading && <Loading>Loading details...please wait..</Loading>}
+			</div>
 			{!isLoading && (
 				<>
 					<DashboardNav currentUser={currentUser} logoutUser={logoutUser} />
 					<DashboardHeader currentUser={currentUser} />
-					{/* DASHBOARD ROUTES */}
-					<div className={styles.Dashboard_actions}>
-						<CreateRoomButton onClick={openCreateRoomModal} />
-					</div>
-					<div className={styles.Dashboard_main}>
-						<DashboardTabs />
-						<Outlet />
-					</div>
 				</>
 			)}
+			{/* DASHBOARD ROUTES */}
+			<div className={styles.Dashboard_actions}>
+				<CreateRoomButton onClick={openCreateRoomModal} />
+			</div>
+			<div className={styles.Dashboard_main}>
+				<DashboardTabs />
+				<Outlet />
+			</div>
 
 			{showCreateRoomModal && (
 				<Modal title="Create Room" closeModal={closeCreateRoomModal}>

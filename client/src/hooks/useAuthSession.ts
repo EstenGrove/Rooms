@@ -1,105 +1,101 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import {
 	AuthSession,
 	clearAuthFromStorage,
-	defaultAuth,
 	getAuthFromStorage,
 	processFreshAuth,
 	setAuthToStorage,
 } from "../utils/utils_auth";
 import { useAppDispatch } from "../store/store";
-import { diffInMins, isBeforeDate } from "../utils/utils_dates";
+import { diffInMins, isAfterDate } from "../utils/utils_dates";
 import { ILoginResp, refreshAuth } from "../utils/utils_users";
 import { IRefreshLoginParams } from "../features/auth/operations";
-import { setAuth } from "../features/auth/authSlice";
+import { selectCurrentSession, setAuth } from "../features/auth/authSlice";
+import { useSelector } from "react-redux";
+import { CurrentSession } from "../features/auth/types";
+import { TResponse } from "../utils/utils_http";
 
 const THRESHOLD = 30; // mins
 
+export interface AuthSessionData {
+	expiry: string | null;
+	userID: string | null;
+	sessionID: string | null;
+	lastRefreshed: string | null;
+}
+
 export interface HookArgs {
 	onSuccess: (session: AuthSession) => void;
-	onReject?: (session: AuthSession) => void;
+	onReject?: () => void;
 }
 
-export interface AuthSessionState extends AuthSession {
-	isAuthenticated: boolean;
-}
-
-const defaultSession: AuthSessionState = {
-	...defaultAuth,
-	isAuthenticated: false,
-};
-
-const shouldRefresh = (authSession: AuthSessionState) => {
-	const { sessionToken, sessionExpiry } = authSession;
-
-	if (!sessionExpiry || !sessionToken) return true;
-
+const shouldRefresh = (
+	currentSession: CurrentSession,
+	authCache: AuthSession
+) => {
 	const now: Date = new Date();
-	// const isBeforeExpiry = isBeforeDate(now, sessionExpiry);
-	const minsToExpiry: number = diffInMins(now, sessionExpiry);
+	const expiry = authCache?.sessionExpiry as string;
+	const isAuthed: boolean =
+		currentSession && "isAuthenticated" in currentSession;
+	const isExpired: boolean = isAfterDate(now, expiry);
+	const isExpiring: boolean = diffInMins(now, expiry) <= THRESHOLD;
+	const isValidSession: boolean = isAuthed && !isExpiring;
 
-	if (minsToExpiry <= 0) return true;
+	// Conditions:
+	// 1. Just logged in, should bail
+	// 2. Page refresh: no session, possibly an authCache exists
 
-	return minsToExpiry <= THRESHOLD;
+	// just logged in
+	if (isValidSession || isExpired) return false;
+
+	// page refresh
+	if (!isAuthed && !currentSession?.userID) return true;
+	if (isExpiring && !isAuthed) return true;
+
+	return false;
 };
 
 const useAuthSession = ({ onSuccess, onReject }: HookArgs) => {
 	const dispatch = useAppDispatch();
 	const authCache: AuthSession = getAuthFromStorage();
-	const [authSession, setAuthSession] = useState<AuthSessionState>({
-		...defaultSession,
-		...authCache,
-	});
-	// check and refresh
-	const checkAndRefreshAuth = useCallback(async () => {
-		const { userID, sessionID, sessionExpiry, sessionToken } = authSession;
-		const now: Date = new Date();
-		const needsRefresh: boolean = shouldRefresh(authSession);
-		const isExpired: boolean = isBeforeDate(now, sessionExpiry as string);
+	const currentSession: CurrentSession = useSelector(selectCurrentSession);
+	const needsRefresh: boolean = shouldRefresh(currentSession, authCache);
 
-		// session doesn't exist, reject automatically
-		if (!sessionExpiry || !sessionToken || isExpired) {
+	console.log("needsRefresh", needsRefresh);
+	// refresh auth
+	const refreshUserAuth = useCallback(async () => {
+		if (!needsRefresh) return;
+
+		const { sessionID, userID } = authCache;
+		const authArgs = { userID, sessionID };
+		const newAuth = (await refreshAuth(
+			authArgs as IRefreshLoginParams
+		)) as TResponse<ILoginResp>;
+		const authData = newAuth?.Data as ILoginResp;
+		const freshAuth: AuthSession = processFreshAuth(authData);
+
+		// refresh succeeded
+		if (authData?.Session && authData?.Session?.userLoginID) {
+			setAuthToStorage(freshAuth);
+			dispatch(setAuth({ user: authData.User, session: authData.Session }));
+			return onSuccess && onSuccess(freshAuth);
+		} else {
+			// refresh failed
 			clearAuthFromStorage();
-			setAuthSession(defaultSession);
-			return onReject && onReject(authSession);
+			return onReject && onReject();
 		}
-
-		if (needsRefresh) {
-			const authParams = { userID, sessionID: Number(sessionID) };
-			const authData = (await refreshAuth(
-				authParams as IRefreshLoginParams
-			)) as ILoginResp;
-
-			if (authData instanceof Error) {
-				return onReject && onReject(defaultSession);
-			}
-
-			const freshAuthCache: AuthSession = processFreshAuth(authData);
-
-			// update states after refresh
-			setAuthToStorage(freshAuthCache);
-			dispatch(setAuth({ User: authData.User, Session: authData.Session }));
-			return onSuccess && onSuccess(freshAuthCache);
-		}
-
-		// if doesn't need refresh, but is a valid session just update the states
-		// dispatch();
-	}, [authSession, dispatch, onSuccess, onReject]);
+	}, [authCache, dispatch, needsRefresh, onReject, onSuccess]);
 
 	useEffect(() => {
 		let isMounted = true;
 		if (!isMounted) return;
 
-		if (!authSession?.userID) return;
-
-		checkAndRefreshAuth();
+		refreshUserAuth();
 
 		return () => {
 			isMounted = false;
 		};
-	}, [checkAndRefreshAuth, authSession]);
-
-	return { authSession };
+	}, [refreshUserAuth]);
 };
 
 export { useAuthSession };

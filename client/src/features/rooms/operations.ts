@@ -47,6 +47,7 @@ const fetchUserRooms = createAsyncThunk(
 		const response = (await getUserRooms(userID)) as UserRoomsResp;
 		const { Data } = response;
 		const userRooms = Data?.Rooms ?? [];
+		console.log("response", response);
 
 		return userRooms as Room[];
 	}

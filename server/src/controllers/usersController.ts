@@ -107,13 +107,16 @@ const loginUser = async (ctx: Context) => {
 
 	const user = userNormalizer.toClientOne(loginResp.user as UserSvcResult);
 	const loginSession = userLoginNormalizer.toClientOne(
-		loginResp.login as UserLoginSvcResult
+		loginResp.login as UserLoginDB
 	);
 
 	const resp = new ResponseModel({
 		status: "SUCCESS",
 		msg: "User was logged in successfully!",
-		data: { User: user, Session: loginSession },
+		data: {
+			User: user,
+			Session: { ...loginSession, sessionID: loginSession?.userLoginID },
+		},
 		errorMsg: null,
 	});
 
@@ -148,15 +151,22 @@ const logoutUser = async (ctx: Context) => {
 };
 
 const refreshLogin = async (ctx: Context) => {
-	const userID = ctx.req.query("userID") as string;
-	const loginSession = (await userService.authenticate(userID)) as UserLoginDB;
+	const { userID, sessionID } = await ctx.req.json();
+	const loginSession = (await userService.refreshAuth(
+		userID,
+		null
+	)) as UserLoginDB;
+	const userRecord = (await userService.getByID(userID, true)) as UserDB;
 
+	const user = userNormalizer.toClientOne(userRecord) as UserClient;
 	const updatedSession = userLoginNormalizer.toClientOne(
 		loginSession
 	) as UserLoginClient;
 	const response = getResponseOk({
-		UserLogin: updatedSession,
+		User: user,
+		Session: updatedSession,
 	});
+
 	return ctx.json(response);
 };
 

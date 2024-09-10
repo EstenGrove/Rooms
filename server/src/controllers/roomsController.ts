@@ -240,11 +240,14 @@ const getRoom = async (ctx: Context) => {
 
 const getUserRooms = async (ctx: Context) => {
 	const userID = ctx.req.query("userID") as string;
-	const rooms = await roomService.getRoomsByUser(userID);
+	const rooms = (await roomService.getRoomsByUser(userID)) as RoomDB[];
+	const userRooms = roomNormalizer.toClient(rooms) as RoomClient[];
 
 	console.log("rooms", rooms);
-
-	return ctx.text("Response");
+	const response = getResponseOk({
+		Rooms: userRooms,
+	});
+	return ctx.json(response);
 };
 
 export {

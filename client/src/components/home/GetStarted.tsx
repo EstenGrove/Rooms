@@ -16,12 +16,12 @@ import { setCurrentMember } from "../../features/members/membersSlice";
 import { RoomMember } from "../../features/members/types";
 import { CurrentRoom } from "../../features/rooms/types";
 import { setCurrentRoom } from "../../features/rooms/roomsSlice";
+import { processFreshAuth, setAuthToStorage } from "../../utils/utils_auth";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import Button from "../shared/Button";
 import Modal from "../shared/Modal";
 import JoinRoom from "../rooms/JoinRoom";
-import { processFreshAuth, setAuthToStorage } from "../../utils/utils_auth";
 
 // SIGN-IN
 // SIGN-UP
@@ -118,7 +118,9 @@ const GetStarted = () => {
 
 		const { User, Session } = loginInfo.Data as ILoginResp;
 		setAuthToStorage(processFreshAuth({ User, Session }));
-		dispatch(setAuth({ user: User, session: Session }));
+		dispatch(
+			setAuth({ user: User, session: { ...Session, isAuthenticated: true } })
+		);
 		navigate("/dashboard/rooms");
 	};
 	const userSignup = async () => {
@@ -135,6 +137,7 @@ const GetStarted = () => {
 
 		const { User, Session } = signupInfo.Data as ISignupResp;
 		dispatch(setAuth({ user: User, session: Session }));
+		setAuthToStorage(processFreshAuth({ User, Session }));
 		navigate("/dashboard/rooms");
 	};
 
