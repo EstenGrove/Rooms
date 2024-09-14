@@ -1,4 +1,4 @@
-import { Pool, Query, QueryResult } from "pg";
+import { Pool, QueryResult } from "pg";
 import { SQLITE_DATABASE as db, type SQLite3DB } from "../db/db";
 import { MemberSvcResult } from "./MemberService";
 
@@ -138,7 +138,7 @@ class RoomsService {
 	constructor(db: Pool) {
 		this.#db = db;
 	}
-	async getRoomsByUser(userID: string) {
+	async getRoomsByUser(userID: string): Promise<RoomSvcResult[] | unknown> {
 		try {
 			const query = `SELECT * FROM get_user_rooms($1)`;
 			const results = await this.#db.query(query, [userID]);

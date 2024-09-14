@@ -6,11 +6,11 @@ type Props = {
 	displayName: string;
 };
 
-const UserBadge = ({ displayName }: Props) => {
+const UserBadge = ({ displayName, ...rest }: Props) => {
 	const name: string = getUserBadgeName(displayName, 10);
 
 	return (
-		<div className={styles.UserBadge}>
+		<div className={styles.UserBadge} {...rest}>
 			<svg className={styles.UserBadge_icon}>
 				<use xlinkHref={`${sprite}#icon-account_circle`}></use>
 			</svg>

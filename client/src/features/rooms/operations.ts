@@ -2,7 +2,14 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { currentEnv, roomsEndpoints } from "../../utils/utils_env";
 import { fetchWithAuth, TResponse } from "../../utils/utils_http";
 import { LiveRoomData } from "../types";
-import { getUserRooms, UserRoomsResp } from "../../utils/utils_rooms";
+import {
+	createRoom,
+	CreateRoomData,
+	CreateRoomParams,
+	CreateRoomResponse,
+	getUserRooms,
+	UserRoomsResp,
+} from "../../utils/utils_rooms";
 import { Room } from "./types";
 
 export interface LiveRoomParams {
@@ -47,10 +54,18 @@ const fetchUserRooms = createAsyncThunk(
 		const response = (await getUserRooms(userID)) as UserRoomsResp;
 		const { Data } = response;
 		const userRooms = Data?.Rooms ?? [];
-		console.log("response", response);
 
 		return userRooms as Room[];
 	}
 );
 
-export { fetchLiveRoom, fetchLiveRoomInfo, fetchUserRooms };
+const createUserRoom = createAsyncThunk(
+	"rooms/createUserRoom",
+	async (params: CreateRoomParams) => {
+		const response = (await createRoom(params)) as TResponse<CreateRoomData>;
+		const data = response.Data as CreateRoomData;
+		return data;
+	}
+);
+
+export { fetchLiveRoom, fetchLiveRoomInfo, fetchUserRooms, createUserRoom };

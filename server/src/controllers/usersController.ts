@@ -6,7 +6,11 @@ import {
 	UserSvcResult,
 } from "../services/UserService";
 import { isError } from "../utils/utils_errors";
-import { getResponseOk, ResponseModel } from "../models/ResponseModel";
+import {
+	getResponseError,
+	getResponseOk,
+	ResponseModel,
+} from "../models/ResponseModel";
 import {
 	UserLoginClient,
 	UserLoginDB,
@@ -152,6 +156,18 @@ const logoutUser = async (ctx: Context) => {
 
 const refreshLogin = async (ctx: Context) => {
 	const { userID, sessionID } = await ctx.req.json();
+
+	if (!userID) {
+		const errResponse = getResponseError(
+			new Error("Refresh failed: Invalid/missing userID"),
+			{
+				User: null,
+				Session: null,
+			}
+		);
+		return ctx.json(errResponse);
+	}
+
 	const loginSession = (await userService.refreshAuth(
 		userID,
 		null
@@ -166,6 +182,14 @@ const refreshLogin = async (ctx: Context) => {
 		User: user,
 		Session: updatedSession,
 	});
+
+	if (loginSession instanceof Error || userRecord instanceof Error) {
+		const errResponse = getResponseError(new Error("Refresh auth failed"), {
+			User: null,
+			Session: null,
+		});
+		return ctx.json(errResponse);
+	}
 
 	return ctx.json(response);
 };

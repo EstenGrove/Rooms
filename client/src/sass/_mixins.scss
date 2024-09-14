@@ -13,9 +13,13 @@
 	border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-@mixin iconButton() {
-	width: 4rem;
-	height: 4rem;
+@mixin iconButton($size: 4rem) {
+	width: $size;
+	min-width: $size;
+	max-width: $size;
+	min-height: $size;
+	max-height: $size;
+	height: $size;
 	border-radius: 50%;
 	border: 1px solid var(--border-color);
 	color: #fff;

@@ -1,5 +1,10 @@
 import { Context } from "hono";
-import { memberService, roomService, sessionService } from "../services";
+import {
+	memberService,
+	queryServicePG,
+	roomService,
+	sessionService,
+} from "../services";
 import { RoomSvcResult } from "../services/RoomsService";
 import { MemberSvcResult } from "../services/MemberService";
 import { SessionSvcResult } from "../services/SessionService";
@@ -24,23 +29,30 @@ const validator = new ValidateExec();
 
 // 1. Create Room
 // 2. Update member's name, if different
+// RETURNS:
+// - New Room
+// - Member
 const createRoom = async (ctx: Context) => {
 	const body = await ctx.req.json();
 	const { userID, memberID, roomName, memberName, isAlive = false } = body;
 
-	const rawRoom = (await roomService.create(
+	const newRoomRaw = (await roomService.create(
 		roomName as string,
 		isAlive as boolean
 	)) as RoomSvcResult;
+	const roomAdminMember = (await memberService.getByID(
+		memberID
+	)) as MemberSvcResult;
 
 	// normalized data
-	const newRoom = roomNormalizer.toClientOne(rawRoom) as RoomClient;
+	const newRoom = roomNormalizer.toClientOne(newRoomRaw) as RoomClient;
+	const roomMember = memberNormalizer.toClientOne(roomAdminMember);
 
 	console.log("Was Created:", newRoom);
 
 	const response = getResponseOk({
 		Room: newRoom,
-		IsAlive: newRoom.isAlive,
+		Member: roomMember,
 	});
 
 	return ctx.json(response);
@@ -242,8 +254,8 @@ const getUserRooms = async (ctx: Context) => {
 	const userID = ctx.req.query("userID") as string;
 	const rooms = (await roomService.getRoomsByUser(userID)) as RoomDB[];
 	const userRooms = roomNormalizer.toClient(rooms) as RoomClient[];
-
 	console.log("rooms", rooms);
+
 	const response = getResponseOk({
 		Rooms: userRooms,
 	});
@@ -253,6 +265,7 @@ const getUserRooms = async (ctx: Context) => {
 export {
 	createRoom,
 	joinRoom,
+	joinRoomAsUser,
 	joinRoomAsGuest,
 	joinRoomAsNewGuest,
 	getRoom,

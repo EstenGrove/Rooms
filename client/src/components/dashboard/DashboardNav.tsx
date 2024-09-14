@@ -9,6 +9,20 @@ type Props = {
 	logoutUser: () => void;
 };
 
+type MsgProps = {
+	currentUser: CurrentUser;
+};
+const WelcomeMessage = ({ currentUser }: MsgProps) => {
+	const username = currentUser?.username;
+	const displayName = currentUser?.displayName;
+	const welcomeName: string = displayName || username;
+	return (
+		<h3 className={styles.WelcomeMessage}>
+			Welcome Back, <b>{welcomeName || ""}</b>
+		</h3>
+	);
+};
+
 const SettingsButton = () => {
 	return (
 		<NavLink to="/dashboard/settings" className={styles.SettingsButton}>
@@ -33,14 +47,36 @@ const LogoutButton = ({ logout }: LogoutBtnProps) => {
 	);
 };
 
+const LogoButton = () => {
+	return (
+		<button type="button" className={styles.LogoButton}>
+			<svg className={styles.LogoButton_icon}>
+				<use xlinkHref={`${sprite}#icon-meeting_room`}></use>
+			</svg>
+			<span>Rooms</span>
+		</button>
+	);
+};
+
 const DashboardNav = ({ currentUser, logoutUser }: Props) => {
 	const displayName = currentUser?.displayName ?? "";
 
 	return (
 		<nav className={styles.DashboardNav}>
-			<UserBadge displayName={displayName as string} />
-			<SettingsButton />
-			<LogoutButton logout={logoutUser} />
+			<div className={styles.DashboardNav_logo}>
+				<LogoButton />
+			</div>
+			<div className={styles.DashboardNav_msg}>
+				<WelcomeMessage currentUser={currentUser} />
+			</div>
+			<div className={styles.DashboardNav_options}>
+				<UserBadge
+					displayName={displayName as string}
+					// style={{ marginLeft: "auto" }}
+				/>
+				<SettingsButton />
+				<LogoutButton logout={logoutUser} />
+			</div>
 		</nav>
 	);
 };

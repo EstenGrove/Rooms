@@ -15,14 +15,16 @@ import { useSelector } from "react-redux";
 import { CurrentSession } from "../features/auth/types";
 import { TResponse } from "../utils/utils_http";
 
-const THRESHOLD = 30; // mins
+const THRESHOLD = 90; // mins
 
-export interface AuthSessionData {
-	expiry: string | null;
-	userID: string | null;
-	sessionID: string | null;
-	lastRefreshed: string | null;
-}
+/**
+ * AuthSession:
+ * - userID: string | null;
+ * - sessionID: number | null;
+ * - sessionToken: string | null;
+ * - sessionExpiry: string | null;
+ * - lastRefreshed: string | null;
+ */
 
 export interface HookArgs {
 	onSuccess: (session: AuthSession) => void;
@@ -37,22 +39,34 @@ const shouldRefresh = (
 	const expiry = authCache?.sessionExpiry as string;
 	const isAuthed: boolean =
 		currentSession && "isAuthenticated" in currentSession;
+	const userNotLoaded: boolean = !currentSession?.userID;
 	const isExpired: boolean = isAfterDate(now, expiry);
 	const isExpiring: boolean = diffInMins(now, expiry) <= THRESHOLD;
-	const isValidSession: boolean = isAuthed && !isExpiring;
 
 	// Conditions:
 	// 1. Just logged in, should bail
 	// 2. Page refresh: no session, possibly an authCache exists
 
+	if (isExpired) return true;
+
+	// if we have no user & no cache, we want to reject on response
+	if (!isAuthed && !expiry) return true;
+	// has cache & isn't expired
+	if (!isAuthed && !isExpired) return true;
+	// has cache & isn't expired
+	if (userNotLoaded && !isExpired) return true;
+	// has cache & isn't expired but IS expiring
+	if (userNotLoaded && !isExpired && isExpiring) return true;
+
 	// just logged in
-	if (isValidSession || isExpired) return false;
-
-	// page refresh
-	if (!isAuthed && !currentSession?.userID) return true;
-	if (isExpiring && !isAuthed) return true;
-
 	return false;
+};
+
+const isExpiredSession = (sessionExpiry: Date | string): boolean => {
+	const now: Date = new Date();
+	const isExpired: boolean = isAfterDate(now, sessionExpiry);
+
+	return isExpired;
 };
 
 const useAuthSession = ({ onSuccess, onReject }: HookArgs) => {
@@ -60,10 +74,14 @@ const useAuthSession = ({ onSuccess, onReject }: HookArgs) => {
 	const authCache: AuthSession = getAuthFromStorage();
 	const currentSession: CurrentSession = useSelector(selectCurrentSession);
 	const needsRefresh: boolean = shouldRefresh(currentSession, authCache);
+	const isExpired: boolean = isExpiredSession(
+		currentSession?.expiry ?? authCache?.sessionExpiry
+	);
 
 	console.log("needsRefresh", needsRefresh);
 	// refresh auth
 	const refreshUserAuth = useCallback(async () => {
+		if (isExpired) return onReject && onReject();
 		if (!needsRefresh) return;
 
 		const { sessionID, userID } = authCache;
@@ -72,10 +90,10 @@ const useAuthSession = ({ onSuccess, onReject }: HookArgs) => {
 			authArgs as IRefreshLoginParams
 		)) as TResponse<ILoginResp>;
 		const authData = newAuth?.Data as ILoginResp;
-		const freshAuth: AuthSession = processFreshAuth(authData);
 
 		// refresh succeeded
 		if (authData?.Session && authData?.Session?.userLoginID) {
+			const freshAuth: AuthSession = processFreshAuth(authData);
 			setAuthToStorage(freshAuth);
 			dispatch(setAuth({ user: authData.User, session: authData.Session }));
 			return onSuccess && onSuccess(freshAuth);
@@ -95,7 +113,8 @@ const useAuthSession = ({ onSuccess, onReject }: HookArgs) => {
 		return () => {
 			isMounted = false;
 		};
-	}, [refreshUserAuth]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 };
 
 export { useAuthSession };

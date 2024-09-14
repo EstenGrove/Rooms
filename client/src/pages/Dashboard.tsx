@@ -21,8 +21,6 @@ import Modal from "../components/shared/Modal";
 import CreateRoom from "../components/rooms/CreateRoom";
 import DashboardTabs from "../components/layout/DashboardTabs";
 import DashboardNav from "../components/dashboard/DashboardNav";
-import CreateRoomButton from "../components/rooms/CreateRoomButton";
-import DashboardHeader from "../components/dashboard/DashboardHeader";
 import Loading from "../components/shared/Loading";
 
 interface NewRoomValues {
@@ -40,9 +38,10 @@ const Dashboard = () => {
 			// do something
 			console.log("Success!", session);
 		},
-		onReject: () => {
-			console.log("Reject");
-			navigate("/?tab=login");
+		onReject: async () => {
+			console.log("Rejected Auth");
+			await logoutUser();
+			// navigate("/?tab=login");
 		},
 	});
 	const isLoading: boolean = useSelector(selectIsLoadingState);
@@ -86,7 +85,7 @@ const Dashboard = () => {
 	};
 
 	const createNewRoom = async () => {
-		// do stuff
+		//
 	};
 	const cancelNewRoom = () => {
 		closeCreateRoomModal();
@@ -117,20 +116,20 @@ const Dashboard = () => {
 	return (
 		<div className={styles.Dashboard}>
 			<div className={styles.Dashboard_loader}>
-				{isLoading && <Loading>Loading details...please wait..</Loading>}
+				{isLoading && (
+					<Loading style={{ minHeight: "25rem" }}>
+						Loading details...please wait..
+					</Loading>
+				)}
 			</div>
 			{!isLoading && (
 				<>
 					<DashboardNav currentUser={currentUser} logoutUser={logoutUser} />
-					<DashboardHeader currentUser={currentUser} />
+					<DashboardTabs initCreateRoom={openCreateRoomModal} />
 				</>
 			)}
 			{/* DASHBOARD ROUTES */}
-			<div className={styles.Dashboard_actions}>
-				<CreateRoomButton onClick={openCreateRoomModal} />
-			</div>
 			<div className={styles.Dashboard_main}>
-				<DashboardTabs />
 				<Outlet />
 			</div>
 

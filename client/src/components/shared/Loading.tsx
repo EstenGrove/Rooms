@@ -1,14 +1,16 @@
-import { ReactNode } from "react";
+import { ComponentPropsWithoutRef, ReactNode } from "react";
 import styles from "../../css/shared/Loading.module.scss";
 import Spinner from "./Spinner";
 
-type Props = {
+type LoadingProps = {
 	children?: ReactNode;
 };
 
-const Loading = ({ children }: Props) => {
+interface Props extends LoadingProps, ComponentPropsWithoutRef<"div"> {}
+
+const Loading = ({ children, ...rest }: Props) => {
 	return (
-		<div className={styles.Loading}>
+		<div className={styles.Loading} {...rest}>
 			<Spinner />
 			<div className={styles.Loading_inner}>{children}</div>
 		</div>
