@@ -3,10 +3,12 @@
 @import "../../sass/custom";
 
 .DashboardHeader {
-	width: 100%;
+	width: max-content;
 	height: auto;
+	margin-left: auto;
 
 	&_title {
+		// @include flex_row(center, center);
 		text-align: center;
 		font-size: 3rem;
 		color: #fff;

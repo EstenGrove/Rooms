@@ -23,8 +23,33 @@ export interface UserClient {
 	isActive: boolean;
 }
 
+const defaultUserDB: UserDB = {
+	user_id: "",
+	member_id: 0,
+	username: "",
+	password: "",
+	display_name: null,
+	is_active: false,
+	created_date: "",
+	last_login_date: "",
+};
+const defaultUserClient: UserClient = {
+	token: null,
+	userID: "",
+	memberID: 0,
+	username: "",
+	password: "",
+	displayName: null,
+	isActive: false,
+	createdDate: "",
+	lastLoginDate: "",
+};
+
 class UserNormalizer {
 	#toDB(record: UserClient): UserDB {
+		console.log("record", record);
+		// if (!record || !("userID" in record)) return defaultUserDB;
+
 		const dbRecord: UserDB = {
 			user_id: record.userID,
 			member_id: record.memberID,
@@ -38,6 +63,8 @@ class UserNormalizer {
 		return dbRecord;
 	}
 	#toClient(record: UserDB): UserClient {
+		// if (!record || !("user_id" in record)) return defaultUserClient;
+
 		const clientRecord: UserClient = {
 			token: null,
 			userID: record.user_id,

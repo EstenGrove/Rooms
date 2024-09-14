@@ -40,7 +40,18 @@ const setupEvents = (eventSource: EventSource, actions: SSEOptions): void => {
 	}
 };
 
-const useSSE = (srcUrl: URL | string, actions: SSEOptions): HookReturn => {
+/**
+ * @description - 'useEventSource' creates & manages a SSE connection & listens for events from
+ * the EventSource and fires any specified action handlers for the corresponding event type.
+ * @param srcUrl {URL|string} - Our 'EventSource' URL
+ * @param actions {SSEOptions} - A config object w/ optional action handlers & settings
+ * @returns IDK
+ */
+
+const useEventSource = (
+	srcUrl: URL | string,
+	actions: SSEOptions
+): HookReturn => {
 	const { deferSetup = true, onClose } = actions;
 	const eventSource = useRef<EventSource>();
 
@@ -85,4 +96,4 @@ const useSSE = (srcUrl: URL | string, actions: SSEOptions): HookReturn => {
 	};
 };
 
-export { useSSE };
+export { useEventSource };

@@ -10,6 +10,7 @@ interface InputProps {
 	onChange: (name: string, value: string) => void;
 	inputRef?: RefObject<HTMLInputElement>;
 	placeholder?: string;
+	autoComplete?: string;
 }
 
 // @ts-expect-error: Extends input's props to support forwarding via ...rest
@@ -23,6 +24,7 @@ const LabelledInput = ({
 	onChange,
 	inputRef,
 	placeholder,
+	autoComplete = "off",
 	...rest
 }: Props) => {
 	return (
@@ -36,6 +38,7 @@ const LabelledInput = ({
 					inputRef={inputRef}
 					onChange={onChange}
 					placeholder={placeholder}
+					autoComplete={autoComplete}
 					{...rest}
 				/>
 			</div>

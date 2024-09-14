@@ -1,28 +1,50 @@
 import { JoinValues, RoomValues } from "../components/rooms/types";
+import { CurrentMember, RoomMember } from "../features/members/types";
+import { CurrentRoom, Room } from "../features/rooms/types";
 import { roomsEndpoints, BASE_URL, currentEnv } from "./utils_env";
-import { fetchWithAuth } from "./utils_http";
+import { fetchWithAuth, TResponse } from "./utils_http";
 
-const createRoom = async (token: string, roomData: RoomValues) => {
+export interface CreateRoomData2 {
+	roomID: number;
+	roomName: string;
+	memberName: string;
+	memberID: number;
+}
+export interface CreateRoomData {
+	Room: Room;
+	Member: CurrentMember;
+}
+
+export interface CreateRoomParams extends RoomValues {
+	userID: string;
+}
+
+const createRoom = async (
+	roomData: CreateRoomParams
+): Promise<TResponse<CreateRoomData> | unknown> => {
 	const url = BASE_URL + roomsEndpoints.create;
 
 	try {
-		const request = await fetch(url, {
+		const response = await fetchWithAuth(url, {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: btoa(currentEnv.user + ":" + currentEnv.password),
-				SecurityToken: token,
-			},
-			body: JSON.stringify(roomData),
+			body: roomData,
 		});
-		const response = await request.json();
+		console.log("response", response);
 		return response;
 	} catch (error) {
 		return error;
 	}
 };
 
-const joinRoomAsNewGuest = async (joinValues: JoinValues) => {
+export interface JoinRoomData {
+	Member: RoomMember;
+	Room: CurrentRoom | Room;
+}
+export type JoinRoomResponse = TResponse<JoinRoomData>;
+
+const joinRoomAsNewGuest = async (
+	joinValues: JoinValues
+): Promise<JoinRoomResponse | unknown> => {
 	let url = currentEnv.base + roomsEndpoints.joinAsNewGuest;
 	url += joinValues.roomCode;
 
@@ -39,4 +61,23 @@ const joinRoomAsNewGuest = async (joinValues: JoinValues) => {
 	}
 };
 
-export { createRoom, joinRoomAsNewGuest };
+export interface UserRoomsData {
+	Rooms: Room[];
+}
+export type UserRoomsResp = TResponse<UserRoomsData>;
+
+const getUserRooms = async (
+	userID: string
+): Promise<UserRoomsResp | unknown> => {
+	let url = currentEnv.base + roomsEndpoints.getRooms;
+	url += "?" + new URLSearchParams({ userID });
+
+	try {
+		const response = await fetchWithAuth(url);
+		return response;
+	} catch (error) {
+		return error;
+	}
+};
+
+export { createRoom, joinRoomAsNewGuest, getUserRooms };

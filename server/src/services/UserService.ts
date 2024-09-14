@@ -20,6 +20,8 @@ export interface UserLoginSvcResult {
 	is_active: boolean;
 	login_date: string;
 	logout_date: string | null;
+	last_refreshed_date: string | null;
+	expiry: string;
 }
 // Combined data including 'users' record, 'user_logins' record & any possible errors as a string
 export interface UserLoginResponse {
@@ -40,11 +42,18 @@ class UserService {
 		this.#db = db;
 	}
 
-	async getByID(userID: string, isActive: boolean = true) {
+	async getByID(
+		userID: string,
+		isActive: boolean = true
+	): Promise<UserSvcResult | unknown> {
 		try {
-			const query: string = `SELECT * FROM users WHERE is_active = $1 AND user_id = $2`;
-			const resp = await this.#db.query(query, [isActive, userID]);
-			return resp;
+			const query: string = `SELECT * FROM users WHERE user_id = $1 AND  is_active = $2`;
+			const resp = (await this.#db.query(query, [
+				userID,
+				isActive,
+			])) as QueryResult;
+			const row = resp?.rows?.[0] as UserSvcResult;
+			return row;
 		} catch (error) {
 			console.log("error", error);
 			return error;
@@ -85,6 +94,23 @@ class UserService {
 			const rows = results.rows as QueryResultRow[];
 			return rows;
 		} catch (error: unknown) {
+			return error;
+		}
+	}
+	async refreshAuth(
+		userID: string,
+		token: string | null = null
+	): Promise<UserLoginSvcResult | unknown> {
+		try {
+			const query = `
+				INSERT INTO user_logins (user_id, security_token)
+				VALUES ($1, $2)
+				RETURNING *;
+			`;
+			const results = await this.#db.query(query, [userID, token]);
+			const row = results?.rows?.[0] as UserLoginSvcResult;
+			return row;
+		} catch (error) {
 			return error;
 		}
 	}

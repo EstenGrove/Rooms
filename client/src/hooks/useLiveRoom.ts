@@ -1,0 +1,8 @@
+// CONSIDER WRAPPING THE LIVE ROOM/SESSION LOGIC INTO A HOOK THAT ALSO HANDLES UPDATING GLOBAL STATE!
+
+const useLiveRoom = () => {
+	//
+	//
+};
+
+export { useLiveRoom };

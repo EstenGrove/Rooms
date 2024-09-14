@@ -6,7 +6,11 @@ import {
 	UserSvcResult,
 } from "../services/UserService";
 import { isError } from "../utils/utils_errors";
-import { ResponseModel } from "../models/ResponseModel";
+import {
+	getResponseError,
+	getResponseOk,
+	ResponseModel,
+} from "../models/ResponseModel";
 import {
 	UserLoginClient,
 	UserLoginDB,
@@ -107,13 +111,16 @@ const loginUser = async (ctx: Context) => {
 
 	const user = userNormalizer.toClientOne(loginResp.user as UserSvcResult);
 	const loginSession = userLoginNormalizer.toClientOne(
-		loginResp.login as UserLoginSvcResult
+		loginResp.login as UserLoginDB
 	);
 
 	const resp = new ResponseModel({
 		status: "SUCCESS",
 		msg: "User was logged in successfully!",
-		data: { User: user, Session: loginSession },
+		data: {
+			User: user,
+			Session: { ...loginSession, sessionID: loginSession?.userLoginID },
+		},
 		errorMsg: null,
 	});
 
@@ -147,4 +154,55 @@ const logoutUser = async (ctx: Context) => {
 	}
 };
 
-export { createUser, loginUser, logoutUser };
+const refreshLogin = async (ctx: Context) => {
+	const { userID, sessionID } = await ctx.req.json();
+
+	if (!userID) {
+		const errResponse = getResponseError(
+			new Error("Refresh failed: Invalid/missing userID"),
+			{
+				User: null,
+				Session: null,
+			}
+		);
+		return ctx.json(errResponse);
+	}
+
+	const loginSession = (await userService.refreshAuth(
+		userID,
+		null
+	)) as UserLoginDB;
+	const userRecord = (await userService.getByID(userID, true)) as UserDB;
+
+	const user = userNormalizer.toClientOne(userRecord) as UserClient;
+	const updatedSession = userLoginNormalizer.toClientOne(
+		loginSession
+	) as UserLoginClient;
+	const response = getResponseOk({
+		User: user,
+		Session: updatedSession,
+	});
+
+	if (loginSession instanceof Error || userRecord instanceof Error) {
+		const errResponse = getResponseError(new Error("Refresh auth failed"), {
+			User: null,
+			Session: null,
+		});
+		return ctx.json(errResponse);
+	}
+
+	return ctx.json(response);
+};
+
+const getUser = async (ctx: Context) => {
+	const userID = ctx.req.query("userID") as string;
+	const userData = (await userService.getByID(userID)) as UserDB;
+	const currentUser = userNormalizer.toClientOne(userData) as UserClient;
+
+	const response = getResponseOk({
+		User: currentUser,
+	});
+	return ctx.json(response);
+};
+
+export { createUser, loginUser, logoutUser, refreshLogin, getUser };

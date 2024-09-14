@@ -10,6 +10,7 @@ type Props = {
 	onChange: (name: string, value: string) => void;
 	joinRoom: () => void;
 	createAccount: () => void;
+	errorMsg?: string;
 	isSubmitting: boolean;
 };
 
@@ -28,13 +29,14 @@ const JoinRoom = ({
 	values,
 	onChange,
 	joinRoom,
+	errorMsg,
 	createAccount,
 	isSubmitting = false,
 }: Props) => {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const isValid: boolean = isValidForm<JoinValues>(values);
 
-	// focus 1st input onMount
+	// focus 'displayName' input onMount
 	useEffect(() => {
 		let isMounted = true;
 		if (!isMounted) return;
@@ -51,6 +53,9 @@ const JoinRoom = ({
 	return (
 		<div className={styles.JoinRoom}>
 			<div className={styles.JoinRoom_form}>
+				{errorMsg && (
+					<span className={styles.JoinRoom_form_errorMsg}>{errorMsg}</span>
+				)}
 				<div className={styles.JoinRoom_form_field}>
 					<LabelledInput
 						id="displayName"
@@ -60,6 +65,7 @@ const JoinRoom = ({
 						value={values.displayName}
 						placeholder="Your name..."
 						label="Enter a display name (visible to others)"
+						autoComplete="off"
 					/>
 				</div>
 				<div className={styles.JoinRoom_form_field}>
@@ -70,6 +76,7 @@ const JoinRoom = ({
 						value={values.roomCode}
 						placeholder="Enter code..."
 						label="Invite Code (eg. XXXX-XXXX-XXXXX)"
+						autoComplete="off"
 					/>
 				</div>
 				<div className={styles.JoinRoom_form_actions}>

@@ -16,4 +16,10 @@ const addEllipsis = (str: string, maxLength: number = 30) => {
 	return newStr + "..";
 };
 
-export { upsertQueryParams, addEllipsis };
+const sleep = (ms: number): Promise<void> => {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+};
+
+export { upsertQueryParams, addEllipsis, sleep };

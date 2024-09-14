@@ -45,7 +45,7 @@ const fetchWithAuth = async (
 			body: JSON.stringify(body),
 		});
 		const response = await request.json();
-		console.log("response", response);
+
 		return response;
 	} catch (error: unknown) {
 		return error;
@@ -78,7 +78,7 @@ class ApiFetch {
 				body: JSON.stringify(body),
 			});
 			const response = await request.json();
-			console.log("response", response);
+
 			return response;
 		} catch (error: unknown) {
 			return error;

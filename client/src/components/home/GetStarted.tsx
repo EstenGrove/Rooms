@@ -11,7 +11,12 @@ import {
 	login,
 	signup,
 } from "../../utils/utils_users";
-import { joinRoomAsNewGuest } from "../../utils/utils_rooms";
+import { joinRoomAsNewGuest, JoinRoomResponse } from "../../utils/utils_rooms";
+import { setCurrentMember } from "../../features/members/membersSlice";
+import { RoomMember } from "../../features/members/types";
+import { CurrentRoom } from "../../features/rooms/types";
+import { setCurrentRoom } from "../../features/rooms/roomsSlice";
+import { processFreshAuth, setAuthToStorage } from "../../utils/utils_auth";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import Button from "../shared/Button";
@@ -112,7 +117,10 @@ const GetStarted = () => {
 		setIsSubmitting(false);
 
 		const { User, Session } = loginInfo.Data as ILoginResp;
-		dispatch(setAuth({ user: User, session: Session }));
+		setAuthToStorage(processFreshAuth({ User, Session }));
+		dispatch(
+			setAuth({ user: User, session: { ...Session, isAuthenticated: true } })
+		);
 		navigate("/dashboard/rooms");
 	};
 	const userSignup = async () => {
@@ -129,13 +137,29 @@ const GetStarted = () => {
 
 		const { User, Session } = signupInfo.Data as ISignupResp;
 		dispatch(setAuth({ user: User, session: Session }));
+		setAuthToStorage(processFreshAuth({ User, Session }));
 		navigate("/dashboard/rooms");
 	};
 
 	const joinNewRoom = async () => {
-		const joinData = await joinRoomAsNewGuest(joinRoomValues);
+		const { roomCode } = joinRoomValues;
+		const joinData = (await joinRoomAsNewGuest(
+			joinRoomValues
+		)) as JoinRoomResponse;
 
 		console.log("joinData", joinData);
+
+		if (joinData.ErrorMsg) {
+			setIsSubmitting(false);
+			return setAuthError(joinData.ErrorMsg);
+		}
+
+		const data = joinData?.Data as { Member: RoomMember; Room: CurrentRoom };
+
+		setIsSubmitting(false);
+		dispatch(setCurrentMember(data.Member));
+		dispatch(setCurrentRoom(data.Room));
+		navigate(`/sessions/${roomCode}`);
 	};
 	const cancelJoinAndSignup = () => {
 		closeJoinRoomModal();
@@ -159,7 +183,7 @@ const GetStarted = () => {
 		if (!!authError && !isSubmitting) {
 			timerID = setTimeout(() => {
 				setAuthError("");
-			}, 5000);
+			}, 10000);
 		}
 
 		return () => {
@@ -232,6 +256,7 @@ const GetStarted = () => {
 						values={joinRoomValues}
 						onChange={handleJoinForm}
 						isSubmitting={isSubmitting}
+						errorMsg={authError as string}
 						joinRoom={() => {
 							setIsSubmitting(true);
 							joinNewRoom();

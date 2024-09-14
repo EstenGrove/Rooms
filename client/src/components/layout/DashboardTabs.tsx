@@ -1,6 +1,7 @@
 import React, { MouseEvent, ReactNode } from "react";
 import styles from "../../css/layout/DashboardTabs.module.scss";
 import { NavLink, useLocation } from "react-router-dom";
+import CreateRoomButton from "../rooms/CreateRoomButton";
 
 type TabButtonProps = {
 	to: string;
@@ -40,7 +41,11 @@ const TabButton = ({ to, isDisabled = false, children }: TabButtonProps) => {
 	);
 };
 
-const DashboardTabs = () => {
+type Props = {
+	initCreateRoom: () => void;
+};
+
+const DashboardTabs = ({ initCreateRoom }: Props) => {
 	const location = useLocation();
 	const isNotLive: boolean = !location.pathname.includes("/dashboard/sessions");
 
@@ -48,11 +53,15 @@ const DashboardTabs = () => {
 		<div className={styles.DashboardTabs}>
 			<TabButton to="user">Home</TabButton>
 			<TabButton to="rooms">Your Rooms</TabButton>
-			<TabButton to="history">Room Sessions</TabButton>
+			<TabButton to="history">History</TabButton>
 			<TabButton to="settings">Settings</TabButton>
 			<TabButton to="sessions" isDisabled={isNotLive}>
 				Live Sessions
 			</TabButton>
+			<CreateRoomButton
+				onClick={initCreateRoom}
+				style={{ marginLeft: "auto" }}
+			/>
 			{/*  */}
 			{/*  */}
 		</div>

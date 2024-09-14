@@ -1,4 +1,14 @@
-import { format, formatDistance } from "date-fns";
+import {
+	addHours,
+	addMinutes,
+	differenceInHours,
+	differenceInMinutes,
+	format,
+	formatDistance,
+	isAfter,
+	isBefore,
+	isWithinInterval,
+} from "date-fns";
 
 export type TDateFormats = {
 	long: string;
@@ -78,6 +88,57 @@ const getRelativeDistance = (date: Date | string): string => {
 	return formatDistance(date, now) + " ago";
 };
 
+// COMPARATORS
+// is 1st arg before 2nd arg?
+const isBeforeDate = (target: Date | string, date: Date | string): boolean => {
+	const before: boolean = isBefore(target, date);
+	return before;
+};
+const isAfterDate = (target: Date | string, date: Date | string): boolean => {
+	const after: boolean = isAfter(target, date);
+
+	return after;
+};
+export interface IDateRange {
+	start: Date | string;
+	end: Date | string;
+}
+const isWithinRange = (date: Date | string, dateRange: IDateRange) => {
+	const between: boolean = isWithinInterval(date, dateRange);
+	return between;
+};
+// get difference in minutes between two dates
+const diffInMins = (
+	date: Date | string,
+	compareDate: Date | string
+): number => {
+	const base = new Date(date);
+	const baseCompare = new Date(compareDate);
+	const diff = differenceInMinutes(base, baseCompare);
+
+	return Math.abs(diff);
+};
+// get difference in minutes between two dates
+const diffInHours = (
+	date: Date | string,
+	compareDate: Date | string
+): number => {
+	const base = new Date(date);
+	const baseCompare = new Date(compareDate);
+	const diff = differenceInHours(base, baseCompare);
+
+	return Math.abs(diff);
+};
+
+const addMinsToDate = (date: Date | string, mins: number = 0): Date => {
+	const withMins: Date = addMinutes(date, mins);
+	return withMins;
+};
+const addHoursToDate = (date: Date | string, hours: number = 0): Date => {
+	const withMins: Date = addHours(date, hours);
+	return withMins;
+};
+
 export {
 	DATE_FORMATS,
 	TIME_FORMATS,
@@ -86,4 +147,11 @@ export {
 	formatTime,
 	formatDateTime,
 	getRelativeDistance,
+	isBeforeDate,
+	isAfterDate,
+	isWithinRange,
+	diffInHours,
+	diffInMins,
+	addMinsToDate,
+	addHoursToDate,
 };

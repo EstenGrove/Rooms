@@ -6,7 +6,8 @@ type Props = {
 };
 
 const DashboardHeader = ({ currentUser }: Props) => {
-	const { displayName, username } = currentUser;
+	const username = currentUser?.username;
+	const displayName = currentUser?.displayName;
 	const welcomeName: string = displayName || username;
 	return (
 		<div className={styles.DashboardHeader}>

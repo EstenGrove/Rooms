@@ -1,6 +1,8 @@
-import { Context, Hono } from "hono";
+import { Hono } from "hono";
 import {
 	createRoom,
+	getLiveRoom,
+	getUserRooms,
 	joinRoom,
 	joinRoomAsGuest,
 	joinRoomAsNewGuest,
@@ -9,15 +11,11 @@ import {
 const app: Hono = new Hono();
 
 // Room Routes:
+app.get("/liveRoom", getLiveRoom);
+app.get("/getRooms", getUserRooms);
 app.post("/createRoom", createRoom);
 app.post("/joinRoom/:roomCode", joinRoom);
 app.post("/joinRoomAsGuest/:roomCode", joinRoomAsGuest);
 app.post("/joinRoomAsNewGuest/:roomCode", joinRoomAsNewGuest);
-
-app.get("/joinRoomAsNewGuest/:roomCode", async (ctx: Context) => {
-	const roomCode = ctx.req.param();
-	console.log("roomCode", roomCode);
-	return ctx.text("Hello");
-});
 
 export default app;
