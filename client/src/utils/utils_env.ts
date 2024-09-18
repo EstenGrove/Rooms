@@ -7,6 +7,7 @@ export interface IEndpoints {
 		leave: string;
 		getLiveRoom: string;
 		getRooms: string;
+		deleteRoom: string;
 	};
 	members: {
 		create: string;
@@ -58,6 +59,7 @@ const API_ENDPOINTS: IEndpoints = {
 		leave: "/rooms/leaveRoom",
 		getLiveRoom: "/rooms/liveRoom",
 		getRooms: "/rooms/getRooms",
+		deleteRoom: "/rooms/deleteRoom",
 	},
 	members: {
 		create: "/members/createMember",

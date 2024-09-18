@@ -3,6 +3,7 @@ import {
 	createRoom,
 	getLiveRoom,
 	getUserRooms,
+	deleteUserRoom,
 	joinRoom,
 	joinRoomAsGuest,
 	joinRoomAsNewGuest,
@@ -14,6 +15,7 @@ const app: Hono = new Hono();
 app.get("/liveRoom", getLiveRoom);
 app.get("/getRooms", getUserRooms);
 app.post("/createRoom", createRoom);
+app.post("/deleteRoom", deleteUserRoom);
 app.post("/joinRoom/:roomCode", joinRoom);
 app.post("/joinRoomAsGuest/:roomCode", joinRoomAsGuest);
 app.post("/joinRoomAsNewGuest/:roomCode", joinRoomAsNewGuest);

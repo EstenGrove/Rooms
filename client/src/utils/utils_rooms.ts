@@ -1,22 +1,21 @@
-import { JoinValues, RoomValues } from "../components/rooms/types";
+import { JoinValues } from "../components/rooms/types";
 import { CurrentMember, RoomMember } from "../features/members/types";
-import { CurrentRoom, Room } from "../features/rooms/types";
+import { CurrentRoom, Room, RoomInfo, RoomInfo } from "../features/rooms/types";
 import { roomsEndpoints, BASE_URL, currentEnv } from "./utils_env";
 import { fetchWithAuth, TResponse } from "./utils_http";
+import { TRecord } from "./utils_misc";
 
-export interface CreateRoomData2 {
-	roomID: number;
-	roomName: string;
-	memberName: string;
-	memberID: number;
-}
 export interface CreateRoomData {
-	Room: Room;
+	Room: RoomInfo;
 	Member: CurrentMember;
 }
 
-export interface CreateRoomParams extends RoomValues {
+export interface CreateRoomParams {
 	userID: string;
+	memberID: number;
+	roomName: string;
+	memberName: string;
+	isAlive: boolean;
 }
 
 const createRoom = async (
@@ -63,6 +62,7 @@ const joinRoomAsNewGuest = async (
 
 export interface UserRoomsData {
 	Rooms: Room[];
+	RoomsInfo: RoomInfo[];
 }
 export type UserRoomsResp = TResponse<UserRoomsData>;
 
@@ -79,5 +79,82 @@ const getUserRooms = async (
 		return error;
 	}
 };
+export interface RoomActionParams {
+	roomID: number;
+	userID: string;
+}
+const deleteRoom = async (
+	params: RoomActionParams
+): Promise<TResponse<Room> | unknown> => {
+	const url = currentEnv.base + roomsEndpoints.deleteRoom;
 
-export { createRoom, joinRoomAsNewGuest, getUserRooms };
+	try {
+		const response = fetchWithAuth(url, {
+			method: "POST",
+			body: params,
+		});
+		return response;
+	} catch (error) {
+		return error;
+	}
+};
+
+// UTILS
+
+export type SortBy = keyof Room;
+
+const sortRooms = (by: SortBy, rooms: RoomInfo[]): RoomInfo[] => {
+	switch (by) {
+		case "lastAliveDate": {
+			const sorted = rooms.sort((a, b) => {
+				const dateA: Date = new Date(a.lastAliveDate);
+				const dateB: Date = new Date(b.lastAliveDate);
+				return Number(dateB) - Number(dateA);
+			});
+			return sorted;
+		}
+		case "createdDate": {
+			const sorted = rooms.sort((a, b) => {
+				const dateA: Date = new Date(a.createdDate);
+				const dateB: Date = new Date(b.createdDate);
+				return Number(dateB) - Number(dateA);
+			});
+			return sorted;
+		}
+		default:
+			return rooms;
+	}
+};
+
+interface RoomWithMembers extends Room {
+	members: RoomMember[];
+}
+
+const mergeMembersIntoRooms = (
+	rooms: Room[],
+	membersByRoom: TRecord<RoomMember>
+): RoomWithMembers[] => {
+	const roomsWithMembers = rooms.map((room: Room) => {
+		const roomID: string = String(room.roomID);
+		if (membersByRoom?.[roomID]) {
+			return {
+				...room,
+				members: membersByRoom?.[roomID],
+			};
+		}
+		return room;
+	});
+
+	return roomsWithMembers as RoomWithMembers[];
+};
+
+export {
+	// REQUESTS
+	createRoom,
+	deleteRoom,
+	getUserRooms,
+	joinRoomAsNewGuest,
+	// UTILS
+	sortRooms,
+	mergeMembersIntoRooms,
+};

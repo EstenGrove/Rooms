@@ -5,55 +5,40 @@ import { useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
 import { logout } from "../utils/utils_users";
 import { CurrentUser } from "../features/auth/types";
-import {
-	resetAuth,
-	selectCurrentUser,
-	selectIsLoadingState,
-} from "../features/auth/authSlice";
+import { resetAuth, selectCurrentUser } from "../features/auth/authSlice";
 import {
 	AuthSession,
 	clearAuthFromStorage,
 	getAuthFromStorage,
 } from "../utils/utils_auth";
 import { useAuthSession } from "../hooks/useAuthSession";
-import { fetchUserRooms } from "../features/rooms/operations";
+import { createUserRoom, fetchUserRooms } from "../features/rooms/operations";
 import Modal from "../components/shared/Modal";
 import CreateRoom from "../components/rooms/CreateRoom";
-import DashboardTabs from "../components/layout/DashboardTabs";
 import DashboardNav from "../components/dashboard/DashboardNav";
-import Loading from "../components/shared/Loading";
-
-interface NewRoomValues {
-	roomName: string;
-	memberName: string;
-	startRoom: boolean;
-}
+import { NewRoomValues } from "../components/types";
 
 const Dashboard = () => {
 	const navigate = useNavigate();
-	const authCache: AuthSession = getAuthFromStorage();
 	const dispatch = useAppDispatch();
+	const authCache: AuthSession = getAuthFromStorage();
+	const currentUser: CurrentUser = useSelector(selectCurrentUser);
 	useAuthSession({
-		onSuccess: (session: AuthSession) => {
+		onSuccess: () => {
 			// do something
-			console.log("Success!", session);
 		},
 		onReject: async () => {
-			console.log("Rejected Auth");
 			await logoutUser();
-			// navigate("/?tab=login");
 		},
 	});
-	const isLoading: boolean = useSelector(selectIsLoadingState);
-	const currentUser: CurrentUser = useSelector(selectCurrentUser);
 
-	const [createRoomValues, setCreateRoomValues] = useState<NewRoomValues>({
-		roomName: "",
-		memberName: currentUser?.displayName as string,
-		startRoom: false,
-	});
 	const [showCreateRoomModal, setShowCreateRoomModal] =
 		useState<boolean>(false);
+	const [createRoomValues, setCreateRoomValues] = useState<NewRoomValues>({
+		roomName: "",
+		startRoom: false,
+		memberName: currentUser?.displayName || "",
+	});
 
 	const handleRoomValues = (name: string, value: string) => {
 		setCreateRoomValues({
@@ -85,7 +70,37 @@ const Dashboard = () => {
 	};
 
 	const createNewRoom = async () => {
-		//
+		const { userID, memberID } = currentUser;
+		const { roomName, memberName, startRoom } = createRoomValues;
+
+		// if 'auto-start', then redirect to room page immediately
+		if (startRoom) {
+			dispatch(
+				createUserRoom({
+					userID: userID,
+					memberID: memberID,
+					roomName: roomName,
+					memberName: memberName,
+					isAlive: startRoom,
+				})
+			)
+				.unwrap()
+				.then((payload) => {
+					const { Room } = payload;
+					const code: string = Room.roomCode;
+					navigate(`/sessions/${code}`);
+				});
+		} else {
+			dispatch(
+				createUserRoom({
+					userID: userID,
+					memberID: memberID,
+					roomName: roomName,
+					memberName: memberName,
+					isAlive: startRoom,
+				})
+			);
+		}
 	};
 	const cancelNewRoom = () => {
 		closeCreateRoomModal();
@@ -104,7 +119,6 @@ const Dashboard = () => {
 		if (!isMounted) return;
 
 		if (currentUser?.userID) {
-			console.log("Firing...");
 			getInitialResources();
 		}
 
@@ -115,19 +129,11 @@ const Dashboard = () => {
 
 	return (
 		<div className={styles.Dashboard}>
-			<div className={styles.Dashboard_loader}>
-				{isLoading && (
-					<Loading style={{ minHeight: "25rem" }}>
-						Loading details...please wait..
-					</Loading>
-				)}
-			</div>
-			{!isLoading && (
-				<>
-					<DashboardNav currentUser={currentUser} logoutUser={logoutUser} />
-					<DashboardTabs initCreateRoom={openCreateRoomModal} />
-				</>
-			)}
+			<DashboardNav
+				currentUser={currentUser}
+				logoutUser={logoutUser}
+				initCreateRoom={openCreateRoomModal}
+			/>
 			{/* DASHBOARD ROUTES */}
 			<div className={styles.Dashboard_main}>
 				<Outlet />

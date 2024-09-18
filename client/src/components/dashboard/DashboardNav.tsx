@@ -1,26 +1,14 @@
+import { NavLink } from "react-router-dom";
+import { CurrentUser } from "../../features/auth/types";
 import styles from "../../css/dashboard/DashboardNav.module.scss";
 import sprite from "../../assets/icons/rooms.svg";
 import UserBadge from "../users/UserBadge";
-import { NavLink } from "react-router-dom";
-import { CurrentUser } from "../../features/auth/types";
+import DashboardTabs from "../layout/DashboardTabs";
 
 type Props = {
 	currentUser: CurrentUser;
 	logoutUser: () => void;
-};
-
-type MsgProps = {
-	currentUser: CurrentUser;
-};
-const WelcomeMessage = ({ currentUser }: MsgProps) => {
-	const username = currentUser?.username;
-	const displayName = currentUser?.displayName;
-	const welcomeName: string = displayName || username;
-	return (
-		<h3 className={styles.WelcomeMessage}>
-			Welcome Back, <b>{welcomeName || ""}</b>
-		</h3>
-	);
+	initCreateRoom: () => void;
 };
 
 const SettingsButton = () => {
@@ -47,33 +35,14 @@ const LogoutButton = ({ logout }: LogoutBtnProps) => {
 	);
 };
 
-const LogoButton = () => {
-	return (
-		<button type="button" className={styles.LogoButton}>
-			<svg className={styles.LogoButton_icon}>
-				<use xlinkHref={`${sprite}#icon-meeting_room`}></use>
-			</svg>
-			<span>Rooms</span>
-		</button>
-	);
-};
-
 const DashboardNav = ({ currentUser, logoutUser }: Props) => {
 	const displayName = currentUser?.displayName ?? "";
 
 	return (
 		<nav className={styles.DashboardNav}>
-			<div className={styles.DashboardNav_logo}>
-				<LogoButton />
-			</div>
-			<div className={styles.DashboardNav_msg}>
-				<WelcomeMessage currentUser={currentUser} />
-			</div>
 			<div className={styles.DashboardNav_options}>
-				<UserBadge
-					displayName={displayName as string}
-					// style={{ marginLeft: "auto" }}
-				/>
+				<DashboardTabs />
+				<UserBadge displayName={displayName as string} />
 				<SettingsButton />
 				<LogoutButton logout={logoutUser} />
 			</div>

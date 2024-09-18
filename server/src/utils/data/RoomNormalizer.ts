@@ -63,6 +63,73 @@ class RoomNormalizer {
 	}
 }
 
-const roomNormalizer = new RoomNormalizer();
+export interface RoomInfoDB extends RoomDB {
+	[key: string]: any;
+}
+export interface RoomInfoClient extends RoomClient {
+	[key: string]: any;
+}
+class RoomInfoNormalizer {
+	#toDB(record: RoomInfoClient) {
+		const dbRecord: RoomInfoDB = {
+			room_id: record.roomID,
+			room_name: record.roomName,
+			room_code: record.roomCode,
+			is_active: record.isActive,
+			is_alive: record.isAlive,
+			created_date: record.createdDate,
+			last_alive_date: record.lastAliveDate,
+			members: record?.members ?? [],
+		};
+		return dbRecord;
+	}
+	#toClient(record: RoomInfoDB) {
+		const clientRecord: RoomInfoClient = {
+			roomID: record.room_id,
+			roomName: record.room_name,
+			roomCode: record.room_code,
+			isActive: record.is_active,
+			isAlive: record.is_alive,
+			createdDate: record.created_date,
+			lastAliveDate: record.last_alive_date,
+			members: record?.members ?? [],
+		};
+		return clientRecord;
+	}
 
-export { RoomNormalizer, roomNormalizer };
+	public toClientOne(record: RoomInfoDB) {
+		const client: RoomInfoClient = {
+			...this.#toClient(record),
+		};
+
+		return client;
+	}
+	public toDBOne(record: RoomInfoClient) {
+		const dbRecord: RoomInfoDB = {
+			...this.#toDB(record),
+		};
+
+		return dbRecord;
+	}
+
+	public toClient(records: RoomInfoDB[]) {
+		const clientRecords: RoomInfoClient[] = records.map(this.#toClient);
+
+		return clientRecords;
+	}
+	public toDB(records: RoomInfoClient[]) {
+		const dbRecords: RoomInfoDB[] = records.map(this.#toDB);
+
+		return dbRecords;
+	}
+}
+
+const roomNormalizer = new RoomNormalizer();
+const roomInfoNormalizer = new RoomInfoNormalizer();
+
+export {
+	RoomNormalizer,
+	RoomInfoNormalizer,
+	roomNormalizer,
+	roomInfoNormalizer,
+};

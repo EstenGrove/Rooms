@@ -1,6 +1,9 @@
+import { RoomMember } from "../../features/members/types";
+
 export interface RoomValues {
 	roomName: string;
 	memberName: string;
+	startRoom: boolean;
 }
 
 export interface RoomInfoMember {
@@ -16,7 +19,7 @@ export interface RoomInfo {
 	createdDate: string;
 	isActive: boolean;
 	isAlive: boolean;
-	members: Array<RoomInfoMember>;
+	members: Array<RoomMember>;
 }
 
 export interface JoinValues {

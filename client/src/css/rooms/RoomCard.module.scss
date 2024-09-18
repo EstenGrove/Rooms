@@ -2,9 +2,16 @@
 @import "../../sass/mixins";
 @import "../../sass/custom";
 
+$width: 35rem;
+$height: 25rem;
+
 .RoomCard {
-	width: 35rem;
-	height: 25rem;
+	width: $width;
+	min-width: $width;
+	max-width: $width;
+	height: $height;
+	min-height: $height;
+	max-height: $height;
 	border-radius: 1rem;
 	border: 1px solid var(--border-color);
 	padding: 2rem;

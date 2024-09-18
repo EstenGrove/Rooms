@@ -47,7 +47,6 @@ const defaultUserClient: UserClient = {
 
 class UserNormalizer {
 	#toDB(record: UserClient): UserDB {
-		console.log("record", record);
 		// if (!record || !("userID" in record)) return defaultUserDB;
 
 		const dbRecord: UserDB = {

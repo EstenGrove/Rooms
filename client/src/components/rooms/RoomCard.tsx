@@ -8,6 +8,7 @@ import { NavLink } from "react-router-dom";
 
 type Props = {
 	roomInfo: RoomInfo;
+	selectRoom: () => void;
 };
 
 // REQUIREMENTS
@@ -61,18 +62,21 @@ const MembersCount = ({ roomMembers }: MembersCount) => {
 
 type Details = {
 	to: string;
+	selectRoom: () => void;
 };
-const ViewDetails = ({ to }: Details) => {
+const ViewDetails = ({ to, selectRoom }: Details) => {
 	return (
-		<NavLink to={to} className={styles.ViewDetails}>
+		<NavLink to={to} className={styles.ViewDetails} onClick={selectRoom}>
 			View Details
 		</NavLink>
 	);
 };
 
-const RoomCard = ({ roomInfo }: Props) => {
-	const { roomName, roomCode, members, lastAliveDate, isAlive } = roomInfo;
+const RoomCard = ({ roomInfo, selectRoom }: Props) => {
+	const { roomName, roomCode, members, createdDate, lastAliveDate, isAlive } =
+		roomInfo;
 	const isAdmin: boolean = false;
+	const activityDate: string = lastAliveDate || createdDate;
 
 	const startRoomSession = async () => {
 		// do stuff
@@ -83,7 +87,7 @@ const RoomCard = ({ roomInfo }: Props) => {
 			<div className={styles.RoomCard_header}>
 				<div className={styles.RoomCard_header_left}>
 					<h4>{addEllipsis(roomName, 35)}</h4>
-					<span>Last active {getRelativeDistance(lastAliveDate)}</span>
+					<span>Last active {getRelativeDistance(activityDate)}</span>
 					{isAdmin && <AdminBadge />}
 				</div>
 				<div className={styles.RoomCard_header_right}>
@@ -94,11 +98,8 @@ const RoomCard = ({ roomInfo }: Props) => {
 			<div className={styles.RoomCard_body}></div>
 			<div className={styles.RoomCard_actions}>
 				<MembersCount roomMembers={members} />
-				<ViewDetails to={roomCode} />
+				<ViewDetails to={roomCode} selectRoom={selectRoom} />
 			</div>
-			{/*  */}
-			{/*  */}
-			{/*  */}
 		</div>
 	);
 };

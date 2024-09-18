@@ -5,3 +5,16 @@
 .UserHome {
 	width: auto;
 }
+
+.WelcomeMessage {
+	min-width: 25rem;
+	text-align: center;
+	font-size: 3rem;
+	color: #fff;
+	margin-left: auto;
+	margin-right: auto;
+
+	& > b {
+		color: var(--blue600);
+	}
+}

@@ -27,7 +27,6 @@ const login = async (
 		});
 		return response;
 	} catch (error) {
-		console.log("error", error);
 		return error;
 	}
 };
@@ -38,10 +37,9 @@ const logout = async (
 	url += "?" + new URLSearchParams({ userID });
 	try {
 		const response = await fetchWithAuth(url);
-		console.log("response", response);
+
 		return response;
 	} catch (error) {
-		console.log("error", error);
 		return error;
 	}
 };
@@ -54,10 +52,9 @@ const signup = async (
 			method: "POST",
 			body: userSignup,
 		});
-		console.log("response", response);
+
 		return response;
 	} catch (error) {
-		console.log("error", error);
 		return error;
 	}
 };

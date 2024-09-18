@@ -140,7 +140,7 @@ class RoomsService {
 	}
 	async getRoomsByUser(userID: string): Promise<RoomSvcResult[] | unknown> {
 		try {
-			const query = `SELECT * FROM get_user_rooms($1)`;
+			const query = `SELECT * FROM get_user_rooms($1) WHERE is_active = true`;
 			const results = await this.#db.query(query, [userID]);
 			const rows = results?.rows ?? "NO RESULTS";
 			return rows;
@@ -247,13 +247,33 @@ class RoomsService {
 			return error;
 		}
 	}
+	async createUserRoom(
+		userID: string,
+		roomName: string,
+		isAlive: boolean = false
+	): Promise<RoomSvcResult[] | unknown> {
+		try {
+			const query = `SELECT * FROM create_user_room($1, $2, $3)`;
+			const results = (await this.#db.query(query, [
+				userID,
+				roomName,
+				isAlive,
+			])) as QueryResult;
+			const newRoom = results?.rows?.[0] as RoomSvcResult;
+			return newRoom;
+		} catch (error) {
+			return error;
+		}
+	}
 	async getMembers(roomID: number): Promise<MemberSvcResult[] | unknown> {
 		try {
 			const query = `SELECT * FROM members WHERE room_id = $1 AND is_active = true`;
 			const results = (await this.#db.query(query, [roomID])) as QueryResult;
 			const rows = results?.rows as MemberSvcResult[];
 			return rows;
-		} catch (error) {}
+		} catch (error) {
+			return error;
+		}
 	}
 	async delete(roomID: number): Promise<boolean | unknown> {
 		try {
@@ -263,6 +283,22 @@ class RoomsService {
 			return row;
 		} catch (error: unknown) {
 			console.log("Whoops:", error);
+			return error;
+		}
+	}
+	async deleteUserRoom(
+		roomID: number,
+		userID: string
+	): Promise<RoomSvcResult | unknown> {
+		try {
+			const query = `SELECT * FROM delete_user_room($1, $2)`;
+			const results = (await this.#db.query(query, [
+				roomID,
+				userID,
+			])) as QueryResult;
+			const updatedRoom = results?.rows?.[0] as RoomSvcResult;
+			return updatedRoom;
+		} catch (error) {
 			return error;
 		}
 	}

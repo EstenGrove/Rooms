@@ -3,13 +3,10 @@ import styles from "../../css/rooms/CreateRoom.module.scss";
 import TextInput from "../shared/TextInput";
 import Button from "../shared/Button";
 import Checkbox from "../shared/Checkbox";
+import { RoomValues } from "./types";
 
 type Props = {
-	roomValues: {
-		roomName: string;
-		memberName: string;
-		startRoom: boolean;
-	};
+	roomValues: RoomValues;
 	onChange: (name: string, value: string) => void;
 	createRoom: () => void;
 	cancelRoom: () => void;

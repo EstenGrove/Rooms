@@ -3,8 +3,8 @@ import { useRef, useEffect } from "react";
 export interface WSOptions {
 	deferConnect?: boolean;
 	onMessage: (msg: MessageEvent) => void;
-	onConnect?: (event: Event) => void;
 	onClose?: (code: CloseEvent) => void;
+	onConnect?: (event: Event) => void;
 	onError?: (event: Event) => void;
 	onTerminate?: () => void;
 }
