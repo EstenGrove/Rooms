@@ -25,9 +25,11 @@ const LiveIndicator = () => {
 };
 
 const RoomSession = () => {
-	const { roomCode } = useParams();
+	const params = useParams();
+	const { id: roomCode } = params;
 	const dispatch = useAppDispatch();
 	const currentMember = useSelector(selectCurrentMember);
+	// const liveRoom = useSelector();
 	const status: TStatus = useSelector((state: RootState) => state.rooms.status);
 	const isLoading: boolean = status === "PENDING";
 
@@ -37,7 +39,7 @@ const RoomSession = () => {
 		if (!isMounted) return;
 
 		if (roomCode) {
-			const { memberID } = currentMember;
+			const memberID = currentMember?.memberID;
 			dispatch(fetchLiveRoom({ roomCode, memberID }));
 		}
 
@@ -52,7 +54,9 @@ const RoomSession = () => {
 				<h1 className={styles.RoomSession_title}>Live Session</h1>
 				<LiveIndicator />
 				{isLoading && <div>Loading room...please wait..</div>}
-				<div>Room Code: {roomCode}</div>
+				<div className={styles.RoomSession_header_code}>
+					Room Code: {roomCode}
+				</div>
 			</div>
 			{/*  */}
 			{/*  */}

@@ -4,6 +4,7 @@ import authReducer from "../features/auth/authSlice";
 import roomsReducer from "../features/rooms/roomsSlice";
 import membersReducer from "../features/members/membersSlice";
 import sessionsReducer from "../features/sessions/sessionsSlice";
+import liveRoomReducer from "../features/live-room/liveRoomSlice";
 
 const store = configureStore({
 	reducer: {
@@ -11,6 +12,7 @@ const store = configureStore({
 		rooms: roomsReducer,
 		members: membersReducer,
 		sessions: sessionsReducer,
+		liveRoom: liveRoomReducer,
 	},
 });
 

@@ -304,4 +304,4 @@ class RoomsService {
 	}
 }
 
-export { RoomsService };
+export { RoomsServiceSQLite, RoomsService };

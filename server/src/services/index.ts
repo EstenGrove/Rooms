@@ -6,26 +6,29 @@ import { RoomsService } from "./RoomsService";
 import { SessionService } from "./SessionService";
 import { UserService } from "./UserService";
 import { UserLoginService } from "./UserLoginService";
+import { LiveRoomService } from "./LiveRoomService";
+import { CardsService } from "./CardsService";
 
 interface IDALService {
 	rooms: RoomsService;
 	members: MemberService;
 	sessions: SessionService;
+	liveRoom?: LiveRoomService;
 	users?: UserService;
 	logins?: UserLoginService;
+	cards?: CardsService;
 }
 // Stand-alone DB query class
 const queryService: QueryService = new QueryService(db);
 const queryServicePG: QueryServicePG = new QueryServicePG(pool);
 // Object service class(s)
 const userService: UserService = new UserService(pool);
-const roomService: RoomsService = new RoomsService(pool); // MIGRATE TO PG
+const roomService: RoomsService = new RoomsService(pool);
 const memberService: MemberService = new MemberService(pool);
-const sessionService: SessionService = new SessionService(pool); // MIGRATE TO PG
+const sessionService: SessionService = new SessionService(pool);
+const liveRoomService: LiveRoomService = new LiveRoomService(pool);
 const userLoginService: UserLoginService = new UserLoginService(pool);
-
-// const data = await userService.getByUsername("estengrove99@gmail.com");
-// console.log("data", data);
+const voteCardsService: CardsService = new CardsService(pool);
 
 const dalServices: IDALService = {
 	rooms: roomService,
@@ -33,6 +36,8 @@ const dalServices: IDALService = {
 	sessions: sessionService,
 	users: userService,
 	logins: userLoginService,
+	liveRoom: liveRoomService,
+	cards: voteCardsService,
 };
 
 export {
@@ -45,5 +50,7 @@ export {
 	roomService,
 	memberService,
 	sessionService,
+	liveRoomService,
 	userLoginService,
+	voteCardsService,
 };

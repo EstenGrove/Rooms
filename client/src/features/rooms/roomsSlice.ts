@@ -38,6 +38,9 @@ const roomsSlice = createSlice({
 			.addCase(fetchLiveRoom.pending, (state: RoomsSlice) => {
 				state.status = "PENDING";
 			})
+			.addCase(fetchLiveRoom.rejected, (state: RoomsSlice) => {
+				state.status = "REJECTED";
+			})
 			.addCase(
 				fetchLiveRoom.fulfilled,
 				(state: RoomsSlice, action: PayloadAction<LiveRoomData>) => {

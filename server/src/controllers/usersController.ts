@@ -26,6 +26,8 @@ import {
 	MemberDB,
 	memberNormalizer,
 } from "../utils/data/MemberNormalizer";
+import { setCookie } from "hono/cookie";
+import { setMemberCookies } from "../utils/shared/utils_members";
 
 const createUser_OLD = async (ctx: Context) => {
 	const body = await ctx.req.json();
@@ -175,6 +177,11 @@ const loginUser = async (ctx: Context) => {
 			Session: { ...loginSession, sessionID: loginSession?.userLoginID },
 		},
 		errorMsg: null,
+	});
+
+	setMemberCookies(ctx, {
+		memberID: user.memberID,
+		roomID: 0, // since we may not have a room, we default it to 0
 	});
 
 	return ctx.json(resp);

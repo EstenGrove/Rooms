@@ -1,6 +1,6 @@
 import { JoinValues } from "../components/rooms/types";
 import { CurrentMember, RoomMember } from "../features/members/types";
-import { CurrentRoom, Room, RoomInfo, RoomInfo } from "../features/rooms/types";
+import { CurrentRoom, Room, RoomInfo } from "../features/rooms/types";
 import { roomsEndpoints, BASE_URL, currentEnv } from "./utils_env";
 import { fetchWithAuth, TResponse } from "./utils_http";
 import { TRecord } from "./utils_misc";
