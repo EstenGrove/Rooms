@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { LiveRoomData, TStatus } from "../types";
 import { RootState } from "../../store/store";
-import { CurrentRoom, Room } from "./types";
-import { fetchLiveRoom, fetchUserRooms } from "./operations";
+import { CurrentRoom, Room, RoomInfo } from "./types";
+import { createUserRoom, fetchLiveRoom, fetchUserRooms } from "./operations";
 import { RoomSession } from "../sessions/types";
-import { UserRoomsData } from "../../utils/utils_rooms";
+import { CreateRoomData, sortRooms } from "../../utils/utils_rooms";
 
 export interface RoomsSlice {
 	currentRoom: CurrentRoom;
-	rooms: Room[];
+	rooms: RoomInfo[];
 	status: TStatus;
 }
 
@@ -16,7 +16,6 @@ const initialState: RoomsSlice = {
 	rooms: [],
 	currentRoom: {
 		room: null,
-		member: null,
 		session: null,
 		members: [],
 	},
@@ -27,7 +26,7 @@ const roomsSlice = createSlice({
 	name: "rooms",
 	initialState: initialState,
 	reducers: {
-		setRooms(state: RoomsSlice, action: PayloadAction<Room[]>) {
+		setRooms(state: RoomsSlice, action: PayloadAction<RoomInfo[]>) {
 			state.rooms = action.payload;
 		},
 		setCurrentRoom(state: RoomsSlice, action: PayloadAction<CurrentRoom>) {
@@ -39,15 +38,18 @@ const roomsSlice = createSlice({
 			.addCase(fetchLiveRoom.pending, (state: RoomsSlice) => {
 				state.status = "PENDING";
 			})
+			.addCase(fetchLiveRoom.rejected, (state: RoomsSlice) => {
+				state.status = "REJECTED";
+			})
 			.addCase(
 				fetchLiveRoom.fulfilled,
 				(state: RoomsSlice, action: PayloadAction<LiveRoomData>) => {
-					const { Room, Member, Members, Session } = action.payload;
+					const { Room, Members, Session } = action.payload;
 					state.status = "FULFILLED";
 					state.currentRoom = {
 						room: Room as Room,
 						session: Session as RoomSession,
-						member: Member,
+						// member: Member,
 						members: Members,
 					};
 				}
@@ -58,9 +60,31 @@ const roomsSlice = createSlice({
 			})
 			.addCase(
 				fetchUserRooms.fulfilled,
-				(state: RoomsSlice, action: PayloadAction<Room[]>) => {
+				(state: RoomsSlice, action: PayloadAction<RoomInfo[]>) => {
+					const sorted: RoomInfo[] = sortRooms(
+						"createdDate",
+						action.payload || []
+					);
 					state.status = "FULFILLED";
-					state.rooms = action.payload;
+					// merge data
+					state.rooms = sorted;
+				}
+			);
+		builder
+			.addCase(createUserRoom.pending, (state: RoomsSlice) => {
+				state.status = "PENDING";
+			})
+			.addCase(
+				createUserRoom.fulfilled,
+				(state: RoomsSlice, action: PayloadAction<CreateRoomData>) => {
+					const { Room } = action.payload;
+					state.status = "FULFILLED";
+					state.rooms = [Room, ...state.rooms];
+					state.currentRoom = {
+						room: Room,
+						members: [],
+						session: null,
+					};
 				}
 			);
 	},
@@ -71,8 +95,11 @@ export const { setRooms, setCurrentRoom } = roomsSlice.actions;
 export const selectCurrentRoom = (state: RootState): CurrentRoom => {
 	return state.rooms.currentRoom;
 };
-export const selectRooms = (state: RootState): Room[] => {
+export const selectRooms = (state: RootState): RoomInfo[] => {
 	return state.rooms.rooms;
+};
+export const selectCurrentRoomInfo = (state: RootState): RoomInfo => {
+	return state.rooms.currentRoom.room as RoomInfo;
 };
 
 export default roomsSlice.reducer;

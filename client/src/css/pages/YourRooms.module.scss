@@ -4,11 +4,26 @@
 
 .YourRooms {
 	@include fill_container;
+	max-width: 120rem;
+	display: block;
+	margin: 0 auto;
+
+	&_title {
+		font-size: 3rem;
+		border-bottom: 2px solid var(--border-color);
+		margin-bottom: 4rem;
+		padding-left: 4%;
+	}
 
 	&_cards {
 		width: 100%;
+		max-width: 120rem;
 		height: auto;
-		@include flex_row(space-evenly, flex-start, wrap);
-		gap: 1rem 1rem;
+		@include flex_row(center, flex-start, wrap);
+		gap: 2rem;
+
+		&:first-child:nth-last-child(1) {
+			justify-self: flex-start;
+		}
 	}
 }

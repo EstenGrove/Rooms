@@ -78,7 +78,6 @@ const useAuthSession = ({ onSuccess, onReject }: HookArgs) => {
 		currentSession?.expiry ?? authCache?.sessionExpiry
 	);
 
-	console.log("needsRefresh", needsRefresh);
 	// refresh auth
 	const refreshUserAuth = useCallback(async () => {
 		if (isExpired) return onReject && onReject();
@@ -102,7 +101,7 @@ const useAuthSession = ({ onSuccess, onReject }: HookArgs) => {
 			clearAuthFromStorage();
 			return onReject && onReject();
 		}
-	}, [authCache, dispatch, needsRefresh, onReject, onSuccess]);
+	}, [authCache, dispatch, isExpired, needsRefresh, onReject, onSuccess]);
 
 	useEffect(() => {
 		let isMounted = true;

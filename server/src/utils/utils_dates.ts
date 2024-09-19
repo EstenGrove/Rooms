@@ -1,7 +1,9 @@
 import {
+	addDays,
 	differenceInMinutes,
 	minutesToHours,
 	minutesToSeconds,
+	subDays,
 } from "date-fns";
 
 const getDiffInMins = (
@@ -9,6 +11,13 @@ const getDiffInMins = (
 	later: Date | string
 ): number => {
 	return differenceInMinutes(later, earlier);
+};
+
+const addDaysToDate = (date: Date | string, days: number): Date => {
+	return addDays(date, days);
+};
+const subDaysFromDate = (date: Date | string, days: number): Date => {
+	return subDays(date, days);
 };
 
 export type MinsTo = "hrs" | "secs" | "days" | "wks";
@@ -42,4 +51,4 @@ const minsTo = (mins: number, to: MinsTo): number => {
 	}
 };
 
-export { getDiffInMins, minsTo };
+export { addDaysToDate, subDaysFromDate, getDiffInMins, minsTo };

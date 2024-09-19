@@ -46,12 +46,10 @@ const processFreshAuth = (authData: ILoginResp): AuthSession => {
 	const freshAuth: AuthSession = {
 		userID: User.userID,
 		sessionToken: Session.token,
-		sessionID: Session.sessionID,
+		sessionID: Session.userLoginID,
 		sessionExpiry: Session.expiry,
 		lastRefreshed: Session.lastRefreshedDate,
 	};
-
-	console.log("freshAuth", freshAuth);
 
 	return freshAuth;
 };

@@ -11,6 +11,7 @@ import { SessionSvcResult } from "../services/SessionService";
 import {
 	RoomClient,
 	RoomDB,
+	roomInfoNormalizer,
 	roomNormalizer,
 } from "../utils/data/RoomNormalizer";
 import {
@@ -21,6 +22,8 @@ import {
 import { ValidateExec } from "../utils/utils_validation";
 import { getResponseError, getResponseOk } from "../models/ResponseModel";
 import { SessionDB, sessionNormalizer } from "../utils/data/SessionNormalizer";
+import { groupBy } from "../utils/utils_data";
+import { mergeMembersIntoRooms } from "../utils/shared/utils_rooms";
 
 const validator = new ValidateExec();
 
@@ -31,12 +34,13 @@ const validator = new ValidateExec();
 // 2. Update member's name, if different
 // RETURNS:
 // - New Room
-// - Member
+// - Member row
 const createRoom = async (ctx: Context) => {
 	const body = await ctx.req.json();
 	const { userID, memberID, roomName, memberName, isAlive = false } = body;
 
-	const newRoomRaw = (await roomService.create(
+	const newRoomRaw = (await roomService.createUserRoom(
+		userID as string,
 		roomName as string,
 		isAlive as boolean
 	)) as RoomSvcResult;
@@ -47,8 +51,6 @@ const createRoom = async (ctx: Context) => {
 	// normalized data
 	const newRoom = roomNormalizer.toClientOne(newRoomRaw) as RoomClient;
 	const roomMember = memberNormalizer.toClientOne(roomAdminMember);
-
-	console.log("Was Created:", newRoom);
 
 	const response = getResponseOk({
 		Room: newRoom,
@@ -250,15 +252,59 @@ const getRoom = async (ctx: Context) => {
 	});
 };
 
+const getMembersByRoom = async (rooms: RoomDB[]) => {
+	const promises = rooms.map((room: RoomDB) => {
+		return new Promise((resolve, reject) => {
+			return roomService.getMembers(room.room_id).then(resolve, reject);
+		});
+	});
+	const rawMembers = await Promise.all(promises);
+	const allMembers = rawMembers.flat();
+
+	const byRoom = groupBy<MemberDB>("room_id", allMembers as MemberDB[]);
+	console.log("byRoom", byRoom);
+
+	return byRoom;
+};
+
 const getUserRooms = async (ctx: Context) => {
 	const userID = ctx.req.query("userID") as string;
 	const rooms = (await roomService.getRoomsByUser(userID)) as RoomDB[];
+	const membersByRoom = await getMembersByRoom(rooms);
+	const withMembers = mergeMembersIntoRooms(rooms, membersByRoom);
+	const roomsInfo = roomInfoNormalizer.toClient(withMembers) as RoomClient[];
 	const userRooms = roomNormalizer.toClient(rooms) as RoomClient[];
-	console.log("rooms", rooms);
 
 	const response = getResponseOk({
 		Rooms: userRooms,
+		RoomsInfo: roomsInfo,
+		MembersByRoom: membersByRoom,
 	});
+	return ctx.json(response);
+};
+
+// Soft-delete's a room for a given user via the 'isActive' flag
+const deleteUserRoom = async (ctx: Context) => {
+	const body = await ctx.req.json();
+	const { roomID, userID } = body;
+	const deletedRoom = (await roomService.deleteUserRoom(
+		Number(roomID),
+		userID
+	)) as RoomDB;
+
+	console.log("deletedRoom", deletedRoom);
+
+	if (deletedRoom instanceof Error) {
+		const errResponse = getResponseError(new Error(deletedRoom.message), {
+			Room: null,
+		});
+		return ctx.json(errResponse);
+	}
+
+	const response = getResponseOk({
+		Room: deletedRoom,
+	});
+
 	return ctx.json(response);
 };
 
@@ -271,4 +317,5 @@ export {
 	getRoom,
 	getLiveRoom,
 	getUserRooms,
+	deleteUserRoom,
 };

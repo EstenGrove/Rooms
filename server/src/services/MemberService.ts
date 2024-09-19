@@ -1,4 +1,4 @@
-import { Pool, QueryResult, QueryResultRow } from "pg";
+import { Pool, QueryResult } from "pg";
 import { SQLite3DB } from "../db/db";
 import { RoomSvcResult } from "./RoomsService";
 

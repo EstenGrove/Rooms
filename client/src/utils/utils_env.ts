@@ -7,6 +7,11 @@ export interface IEndpoints {
 		leave: string;
 		getLiveRoom: string;
 		getRooms: string;
+		deleteRoom: string;
+	};
+	liveRoom: {
+		getInfo: string;
+		getCards: string;
 	};
 	members: {
 		create: string;
@@ -58,6 +63,11 @@ const API_ENDPOINTS: IEndpoints = {
 		leave: "/rooms/leaveRoom",
 		getLiveRoom: "/rooms/liveRoom",
 		getRooms: "/rooms/getRooms",
+		deleteRoom: "/rooms/deleteRoom",
+	},
+	liveRoom: {
+		getInfo: "/live/getRoom",
+		getCards: "/live/getCards",
 	},
 	members: {
 		create: "/members/createMember",
@@ -79,6 +89,7 @@ const {
 	users: usersEndpoints,
 	rooms: roomsEndpoints,
 	members: membersEndpoints,
+	liveRoom: liveEndpoints,
 } = API_ENDPOINTS;
 
 export {
@@ -90,4 +101,5 @@ export {
 	roomsEndpoints,
 	membersEndpoints,
 	usersEndpoints,
+	liveEndpoints,
 };

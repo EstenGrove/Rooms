@@ -26,8 +26,10 @@ import {
 	MemberDB,
 	memberNormalizer,
 } from "../utils/data/MemberNormalizer";
+import { setCookie } from "hono/cookie";
+import { setMemberCookies } from "../utils/shared/utils_members";
 
-const createUser = async (ctx: Context) => {
+const createUser_OLD = async (ctx: Context) => {
 	const body = await ctx.req.json();
 	const { username, password } = body;
 
@@ -37,15 +39,12 @@ const createUser = async (ctx: Context) => {
 	)) as UserSvcResult;
 
 	if (userAlreadyExists || isError(userAlreadyExists)) {
-		return ctx.json({
-			Status: "FAILED",
-			ErrorMsg: "Username is taken. Try another.",
-			Data: {
-				User: null,
-				Session: null,
-				Member: null,
-			},
+		const errResp = getResponseError(new Error("Username is taken"), {
+			User: null,
+			Session: null,
+			Member: null,
 		});
+		return ctx.json(errResp);
 	}
 
 	// Create a new user, member & login session record: set default room, displayName values
@@ -59,6 +58,8 @@ const createUser = async (ctx: Context) => {
 	const newLoginRecord = (await userLoginService.getByUserID(
 		newUserAcct.user_id
 	)) as UserLoginDB;
+
+	console.log("newLoginRecord", newLoginRecord);
 
 	// normalized data
 	const newUser: UserClient = userNormalizer.toClientOne(
@@ -75,15 +76,69 @@ const createUser = async (ctx: Context) => {
 	// - Add JWT generator
 	// - Set JWT to httponly cookie
 
-	return ctx.json({
-		Status: "SUCCESS",
-		Message: "Username is available!",
-		Data: {
-			User: newUser,
-			Session: newLogin,
-			Member: newMember,
-		},
+	const createdResp = getResponseOk({
+		User: newUser,
+		Session: newLogin,
+		Member: newMember,
 	});
+	return ctx.json(createdResp);
+};
+const createUser = async (ctx: Context) => {
+	const body = await ctx.req.json();
+	const { username, password } = body;
+
+	// check if user/username already exists
+	const userAlreadyExists = (await userService.getByUsername(
+		username
+	)) as UserSvcResult;
+
+	if (userAlreadyExists || isError(userAlreadyExists)) {
+		const errResp = getResponseError(new Error("Username is taken"), {
+			User: null,
+			Session: null,
+			Member: null,
+		});
+		return ctx.json(errResp);
+	}
+
+	// Create a new user, member & login session record: set default room, displayName values
+	const newUserAcct = (await userService.signup(
+		username,
+		password,
+		username,
+		false
+	)) as UserDB;
+	const newMemberAcct = (await memberService.getByID(
+		newUserAcct.member_id
+	)) as MemberDB;
+	// fetch the auto-created login session record for the new user
+	const newLoginRecord = (await userLoginService.getByUserID(
+		newUserAcct.user_id
+	)) as UserLoginDB;
+
+	console.log("newLoginRecord", newLoginRecord);
+
+	// normalized data
+	const newUser: UserClient = userNormalizer.toClientOne(
+		newUserAcct
+	) as UserClient;
+	const newMember: MemberClient = memberNormalizer.toClientOne(
+		newMemberAcct as MemberDB
+	);
+	const newLogin: UserLoginClient = userLoginNormalizer.toClientOne(
+		newLoginRecord as UserLoginDB
+	) as UserLoginClient;
+
+	// ##TODO:
+	// - Add JWT generator
+	// - Set JWT to httponly cookie
+
+	const createdResp = getResponseOk({
+		User: newUser,
+		Session: newLogin,
+		Member: newMember,
+	});
+	return ctx.json(createdResp);
 };
 
 const loginUser = async (ctx: Context) => {
@@ -122,6 +177,11 @@ const loginUser = async (ctx: Context) => {
 			Session: { ...loginSession, sessionID: loginSession?.userLoginID },
 		},
 		errorMsg: null,
+	});
+
+	setMemberCookies(ctx, {
+		memberID: user.memberID,
+		roomID: 0, // since we may not have a room, we default it to 0
 	});
 
 	return ctx.json(resp);

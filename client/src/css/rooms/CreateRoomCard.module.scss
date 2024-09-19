@@ -6,7 +6,7 @@
 	width: 35rem;
 	height: 25rem;
 	border-radius: 1rem;
-	border: 2px dashed var(--border-color);
+	border: 2px dashed var(--accent);
 	padding: 2rem;
 	background-color: transparent;
 	@include flex_col(center, center);
@@ -14,10 +14,16 @@
 	transition: all 0.2s ease-in-out;
 	&:hover {
 		cursor: pointer;
-		border: 2px dashed var(--accent);
+		background-color: var(--accent);
+		// border: 2px dashed var(--border-color);
+		color: #fff;
 	}
 	&:hover &_text {
 		color: var(--accent);
+		color: #fff;
+	}
+	&:hover &_icon {
+		fill: #fff;
 	}
 
 	&_icon {

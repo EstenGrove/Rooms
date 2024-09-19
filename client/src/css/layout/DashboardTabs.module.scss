@@ -3,14 +3,11 @@
 @import "../../sass/custom";
 
 .DashboardTabs {
-	width: 100%;
-	height: 8rem;
-	padding: 1rem 4rem;
-	@include flex_row(flex-start, flex-end);
+	width: auto;
+	height: 100%;
+	@include flex_row(flex-start, flex-start);
 	gap: 0 0.5rem;
-	margin-bottom: 4rem;
-	overflow-x: scroll;
-	@include scrollbarX();
+	margin-right: auto;
 }
 .TabButton {
 	min-width: max-content;
@@ -43,13 +40,66 @@ a[aria-disabled="true"] {
 	cursor: not-allowed;
 }
 
-@media only screen and (max-width: 800px) {
-	.DashboardTabs {
-		padding: 1rem;
+@mixin mobileBtn() {
+	width: 4rem;
+	height: 4rem;
+	min-width: 4rem;
+	max-width: 4rem;
+	min-height: 4rem;
+	max-height: 4rem;
+	border-radius: 50%;
+	text-decoration: none;
+	@include flex_row(center, center);
+	border: 1px solid transparent;
+}
+
+.DashboardMobileTabs {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100vw;
+	height: 5rem;
+	display: block;
+	background-color: var(--bg-foreground);
+
+	&_inner {
+		@include fill_container;
+		@include flex_row(center, center);
+		gap: 0 4rem;
 	}
-	.TabButton {
-		padding: 0.5rem 1rem;
-		width: max-content;
-		font-size: 1.4rem;
+}
+.MobileTabButton {
+	@include mobileBtn();
+
+	&_wrapper {
+		@include fill_container;
+
+		@include flex_row(center, center);
+
+		&_icon {
+			width: 3.2rem;
+			height: 3.2rem;
+			fill: var(--border-color);
+			fill: var(--blueGrey600);
+		}
+	}
+}
+
+.isMobileActive {
+	border-color: var(--accent);
+	background-color: var(--bg-foreground);
+
+	& svg {
+		fill: var(--accent);
+	}
+}
+
+@media only screen and (max-width: 800px) {
+	a[aria-disabled="true"] .TabButton {
+		cursor: not-allowed;
+	}
+	a[aria-disabled="true"] {
+		opacity: 0.3;
+		cursor: not-allowed;
 	}
 }

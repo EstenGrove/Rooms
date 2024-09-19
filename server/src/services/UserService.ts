@@ -1,4 +1,4 @@
-import { Pool, QueryResult, QueryResultRow } from "pg";
+import { Pool, Query, QueryResult, QueryResultRow } from "pg";
 import PostgresDB from "../db/postgres/postgresDB";
 
 // Table: 'users'
@@ -73,6 +73,26 @@ class UserService {
 			return row as UserSvcResult;
 		} catch (error) {
 			console.log("error", error);
+			return error;
+		}
+	}
+	async signup(
+		username: string,
+		password: string,
+		displayName: string,
+		isAlive: boolean = false
+	): Promise<UserSvcResult | unknown> {
+		try {
+			const query = `SELECT * FROM user_signup($1, $2, $3, $4)`;
+			const results = (await this.#db.query(query, [
+				username,
+				password,
+				displayName,
+				isAlive,
+			])) as QueryResult;
+			const newUser = results?.rows?.[0] as UserSvcResult;
+			return newUser;
+		} catch (error) {
 			return error;
 		}
 	}

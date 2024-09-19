@@ -1,61 +1,155 @@
 import styles from "../css/pages/YourRooms.module.scss";
-import RoomCard from "../components/rooms/RoomCard";
 import { RoomInfo } from "../components/rooms/types";
+import { useSelector } from "react-redux";
+import { selectRooms, setCurrentRoom } from "../features/rooms/roomsSlice";
+import { RootState, useAppDispatch } from "../store/store";
+import Loading from "../components/shared/Loading";
+import RoomCard from "../components/rooms/RoomCard";
 import CreateRoomCard from "../components/rooms/CreateRoomCard";
+import { CurrentUser } from "../features/auth/types";
+import { selectCurrentUser } from "../features/auth/authSlice";
+import { useState } from "react";
+import { createUserRoom } from "../features/rooms/operations";
+import { useNavigate } from "react-router-dom";
+import { NewRoomValues } from "../components/types";
+import Modal from "../components/shared/Modal";
+import CreateRoom from "../components/rooms/CreateRoom";
 
-const createDate = (start: Date, end: Date): Date => {
-	return new Date(
-		start.getTime() + Math.random() * (end.getTime() - start.getTime())
+type RoomsListProps = {
+	rooms: RoomInfo[];
+	goToRoom: (room: RoomInfo) => void;
+	createNewRoom: () => void;
+};
+
+const RoomsList = ({ rooms, createNewRoom, goToRoom }: RoomsListProps) => {
+	return (
+		<>
+			<CreateRoomCard onClick={createNewRoom} />
+			{rooms.map((room) => (
+				<RoomCard
+					key={room.roomCode}
+					roomInfo={room}
+					selectRoom={() => goToRoom(room)}
+				/>
+			))}
+		</>
 	);
 };
 
-const createFakeObj = (id: number): RoomInfo => {
-	const randomDate = createDate(new Date(2023, 3, 16), new Date());
-	const createdDate = createDate(new Date(2019, 1, 1), new Date());
-	return {
-		roomID: id,
-		roomCode: crypto.randomUUID(),
-		roomName: "ENG-1 Room",
-		lastAliveDate: randomDate.toUTCString(),
-		createdDate: createdDate.toUTCString(),
-		isActive: true,
-		isAlive: id % 2 === 0,
-		members: [
-			{ memberID: 1, memberName: "Steven G." },
-			{ memberID: 2, memberName: "Jessica" },
-			{ memberID: 3, memberName: "Theresa L." },
-			{ memberID: 4, memberName: "Sanjay R." },
-			{ memberID: 5, memberName: "Mohammed" },
-		],
-	};
-};
-
-const createRooms = (count: number): RoomInfo[] => {
-	const rooms = [];
-	for (let i = 0; i < count; i++) {
-		const room = createFakeObj(i);
-		rooms.push(room);
-	}
-
-	return rooms;
+const initialVals: NewRoomValues = {
+	roomName: "",
+	startRoom: false,
+	memberName: "",
 };
 
 const YourRooms = () => {
-	const userRooms: RoomInfo[] = createRooms(12);
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
+	const currentUser: CurrentUser = useSelector(selectCurrentUser);
+	const userRooms: RoomInfo[] = useSelector(selectRooms);
+	const isLoadingRooms: boolean =
+		useSelector((state: RootState) => state.rooms.status) === "PENDING";
+	// local state(s)
+	const [showCreateRoomModal, setShowCreateRoomModal] = useState(false);
+	const [createRoomValues, setCreateRoomValues] = useState<NewRoomValues>({
+		roomName: "",
+		startRoom: false,
+		memberName: currentUser?.displayName || "",
+	});
+
+	const handleRoomValues = (name: string, value: string) => {
+		setCreateRoomValues({
+			...createRoomValues,
+			[name]: value,
+		});
+	};
+
+	const openCreateRoomModal = () => {
+		setShowCreateRoomModal(true);
+	};
+	const closeCreateRoomModal = () => {
+		setShowCreateRoomModal(false);
+	};
 
 	const createNewRoom = async () => {
-		// do stuff
+		const { userID, memberID } = currentUser;
+		const { roomName, memberName, startRoom } = createRoomValues;
+
+		// if 'auto-start', then redirect to room page immediately
+		if (startRoom) {
+			dispatch(
+				createUserRoom({
+					userID: userID,
+					memberID: memberID,
+					roomName: roomName,
+					memberName: memberName,
+					isAlive: startRoom,
+				})
+			)
+				.unwrap()
+				.then((payload) => {
+					const { Room } = payload;
+					const code: string = Room.roomCode;
+					// redirect to live session page, if applicable
+					if (code) {
+						navigate(`/sessions/${code}`);
+					}
+				});
+		} else {
+			await dispatch(
+				createUserRoom({
+					userID: userID,
+					memberID: memberID,
+					roomName: roomName,
+					memberName: memberName,
+					isAlive: startRoom,
+				})
+			);
+			// not actually cancelling, just res
+			resetNewRoomValues();
+			closeCreateRoomModal();
+		}
+	};
+
+	const resetNewRoomValues = () => {
+		const { displayName } = currentUser;
+		setCreateRoomValues({ ...initialVals, memberName: displayName as string });
+	};
+
+	const goToRoom = (room: RoomInfo) => {
+		dispatch(
+			setCurrentRoom({
+				room: room,
+				session: null,
+				members: room.members,
+			})
+		);
 	};
 
 	return (
 		<div className={styles.YourRooms}>
+			<h2 className={styles.YourRooms_title}>Your Rooms</h2>
 			<div className={styles.YourRooms_cards}>
-				<CreateRoomCard onClick={createNewRoom} />
-				{userRooms &&
-					userRooms.map((room) => (
-						<RoomCard key={room.roomCode} roomInfo={room} />
-					))}
+				{isLoadingRooms && <Loading>Loading your rooms...</Loading>}
+				{!!userRooms && (
+					<RoomsList
+						rooms={userRooms}
+						createNewRoom={openCreateRoomModal}
+						goToRoom={goToRoom}
+					/>
+				)}
 			</div>
+
+			{showCreateRoomModal && (
+				<Modal title="Create Room" closeModal={closeCreateRoomModal}>
+					<CreateRoom
+						roomValues={createRoomValues}
+						onChange={handleRoomValues}
+						createRoom={createNewRoom}
+						cancelRoom={resetNewRoomValues}
+					/>
+				</Modal>
+			)}
 		</div>
 	);
 };

@@ -11,9 +11,13 @@ export interface Room {
 	isAlive: boolean;
 }
 
+export interface RoomInfo extends Room {
+	members: RoomMember[];
+}
+
 export interface CurrentRoom {
 	room: Room | null;
-	member: RoomMember | null;
+	// member: CurrentMember | null;
 	members: RoomMember[];
 	session: RoomSession | null;
 }

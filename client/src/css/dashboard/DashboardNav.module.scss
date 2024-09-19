@@ -15,22 +15,11 @@
 
 	&_options {
 		width: max-content;
+		width: 100%;
 		height: 100%;
 		gap: 0 1rem;
 		@include flex_row(flex-end, flex-start);
-	}
-}
-
-.WelcomeMessage {
-	min-width: 25rem;
-	text-align: center;
-	font-size: 3rem;
-	color: #fff;
-	margin-left: auto;
-	margin-right: auto;
-
-	& > b {
-		color: var(--blue600);
+		@include flex_row(flex-end, baseline);
 	}
 }
 

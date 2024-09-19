@@ -6,11 +6,10 @@ import {
 	createRoom,
 	CreateRoomData,
 	CreateRoomParams,
-	CreateRoomResponse,
 	getUserRooms,
 	UserRoomsResp,
 } from "../../utils/utils_rooms";
-import { Room } from "./types";
+import { RoomInfo } from "./types";
 
 export interface LiveRoomParams {
 	roomCode: string;
@@ -53,9 +52,9 @@ const fetchUserRooms = createAsyncThunk(
 	async (userID: string) => {
 		const response = (await getUserRooms(userID)) as UserRoomsResp;
 		const { Data } = response;
-		const userRooms = Data?.Rooms ?? [];
+		const userRooms = Data?.RoomsInfo ?? [];
 
-		return userRooms as Room[];
+		return userRooms as RoomInfo[];
 	}
 );
 
@@ -64,6 +63,7 @@ const createUserRoom = createAsyncThunk(
 	async (params: CreateRoomParams) => {
 		const response = (await createRoom(params)) as TResponse<CreateRoomData>;
 		const data = response.Data as CreateRoomData;
+
 		return data;
 	}
 );
